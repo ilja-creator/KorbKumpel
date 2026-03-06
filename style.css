@@ -1,0 +1,54 @@
+@font-face {
+    font-family: "Black Ops One";
+    src: url("assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "Zain";
+    src: url("assets/fonts/Zain/Zain-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "Zain-Bold";
+    src: url("assets/fonts/Zain/Zain-Bold.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    background-color: #000;
+    color: #fff;
+    margin: 2vw;
+    font-family: "Zain", sans-serif;
+}
+
+h1 {
+    font-family: "Black Ops One", sans-serif;
+    color: green;
+    font-size: clamp(1.8rem, 15vw, 3.2rem);
+    text-align: center;
+
+    border: 2px solid darkgreen;
+    padding: 0.3rem 0.3rem;
+    border-radius: 0.2rem;
+
+    display: inline-block;
+    margin-top: 1rem auto;
+    margin-bobottom: 0.25rem auto;
+}
+h2 {
+    font-family: "Zain-Bold", sans-serif;
+    color: green;
+    font-size: clamp(0.4rem, 10vw, 1.5rem);
+    text-align: center;
+
+
+
+}
+
+button {
+    background-color: mediumaquamarine;
+
+}
