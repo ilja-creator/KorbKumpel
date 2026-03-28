@@ -17,26 +17,41 @@
     font-style: normal;
 }
 
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 body {
     background-color: #000;
     color: #fff;
-    margin: 2vw;
+    margin: 2rem;
+    padding-top: 6rem;
     font-family: "Zain", sans-serif;
 }
 
 h1 {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+
     font-family: "Black Ops One", sans-serif;
     color: green;
     font-size: clamp(1.8rem, 15vw, 3.2rem);
     text-align: center;
 
-    border: 2px solid darkgreen;
+    border-bottom: 2px solid darkgreen;
     padding: 0.3rem 0.3rem;
-    border-radius: 0.2rem;
 
-    display: inline-block;
-    margin-top: 1rem auto;
-    margin-bobottom: 0.25rem auto;
+    background-color: #000;
+    z-index: 1000;
 }
 h2 {
     font-family: "Zain-Bold", sans-serif;
@@ -44,11 +59,39 @@ h2 {
     font-size: clamp(0.4rem, 10vw, 1.5rem);
     text-align: center;
 
-
-
+    margin-top: -0.3rem;
+    margin-bottom: 0;
 }
 
 button {
-    background-color: mediumaquamarine;
+    display: block;
+    margin: 2rem auto;
+    padding: 0.8rem 1.6rem;
 
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #0a0a0a;
+
+    font-size: 1.2rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.6rem;
+
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 12px rgba(46, 204, 113, 0.6);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 0 6px rgba(46, 204, 113, 0.4);
+}
+
+.center{
+    text-align: center;
 }
