@@ -1,4 +1,4 @@
-<!DOYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,11 +13,26 @@
     <h2>Neue Liste erstellen</h2>
     <input
         type="text"
-        id="list_1"
+        id="list"
         placeholder="Name der Liste"
         required
         maxlength="25"
     >
-    <script src="script.js"></script>
+    <select id="category" required>
+        <option value="weekly">Wocheneinkauf</option>
+        <option value="special">Sondereinkauf</option>
+        <option value="party">Partyeinkauf</option>
+        <option value="holiday">Urlaubseinkauf</option>
+        <option value="else">Sonstiges</option>
+        <option value="">-</option>
+    </select>
+    <div class="checkbox-row">
+        <input type="checkbox" id="acception" required>
+        <label for="acception">
+            Mit der erstellung der Liste stimme ich zu, dass meien Daten gespeichert und zu Zwecken der Weiterentwicklung von "KorbKumpel" verwendet werden dürfen.</label>
+    </div>
+    <button id="create_list">Liste erstellen</button>
+
+    <script type="module" src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#000000">
+    <title>KorbKumpel lädt</title>
+    <link rel="icon" type="image/png" href="assets/image/icon.png">
+    <style>
+        @font-face {
+            font-family: "Black Ops One";
+            src: url("assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: "Zain";
+            src: url("assets/fonts/Zain/Zain-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 50% 35%, rgba(46, 204, 113, 0.22), transparent 34rem),
+                #000;
+            color: #fff;
+            font-family: "Zain", sans-serif;
+        }
+
+        .loading-screen {
+            width: min(90vw, 460px);
+            text-align: center;
+            animation: fade-in 0.8s ease-out both;
+        }
+
+        .brand {
+            margin: 0 0 2rem;
+            font-family: "Black Ops One", sans-serif;
+            color: #2ecc71;
+            font-size: clamp(2.4rem, 13vw, 4.4rem);
+            letter-spacing: 0;
+            text-shadow: 0 0 22px rgba(46, 204, 113, 0.45);
+        }
+
+        .basket-loader {
+            position: relative;
+            width: 9rem;
+            height: 7rem;
+            margin: 0 auto 2rem;
+        }
+
+        .basket-handle {
+            position: absolute;
+            left: 1.7rem;
+            top: 0;
+            width: 5.6rem;
+            height: 3.8rem;
+            border: 0.35rem solid #2ecc71;
+            border-bottom: 0;
+            border-radius: 5rem 5rem 0 0;
+            animation: handle-glow 1.6s ease-in-out infinite;
+        }
+
+        .basket-body {
+            position: absolute;
+            left: 0.7rem;
+            bottom: 0;
+            width: 7.6rem;
+            height: 4.6rem;
+            border: 0.35rem solid #2ecc71;
+            border-top-width: 0.5rem;
+            border-radius: 0.4rem 0.4rem 1.2rem 1.2rem;
+            background:
+                linear-gradient(90deg, transparent 27%, rgba(46, 204, 113, 0.35) 27% 34%, transparent 34% 66%, rgba(46, 204, 113, 0.35) 66% 73%, transparent 73%),
+                linear-gradient(0deg, transparent 30%, rgba(46, 204, 113, 0.35) 30% 38%, transparent 38% 64%, rgba(46, 204, 113, 0.35) 64% 72%, transparent 72%);
+            box-shadow: 0 0 28px rgba(46, 204, 113, 0.35);
+            animation: basket-bounce 1.2s ease-in-out infinite;
+        }
+
+        .item {
+            position: absolute;
+            top: -0.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 0.25rem;
+            animation: drop 1.8s ease-in-out infinite;
+        }
+
+        .item:nth-child(3) {
+            left: 1.5rem;
+            background: #2ecc71;
+            animation-delay: 0s;
+        }
+
+        .item:nth-child(4) {
+            left: 4rem;
+            background: #f1c40f;
+            animation-delay: 0.25s;
+        }
+
+        .item:nth-child(5) {
+            left: 6.5rem;
+            background: #e74c3c;
+            animation-delay: 0.5s;
+        }
+
+        .loading-text {
+            margin: 0 0 1rem;
+            font-size: 1.35rem;
+        }
+
+        .progress {
+            width: 100%;
+            height: 0.7rem;
+            overflow: hidden;
+            border: 1px solid rgba(46, 204, 113, 0.45);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .progress-bar {
+            width: 45%;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #27ae60, #f1c40f, #2ecc71);
+            animation: loading-bar 1.4s ease-in-out infinite;
+        }
+
+        .status {
+            margin: 1rem 0 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(1rem);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes basket-bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-0.35rem);
+            }
+        }
+
+        @keyframes handle-glow {
+            0%, 100% {
+                filter: drop-shadow(0 0 0 rgba(46, 204, 113, 0));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 0.8rem rgba(46, 204, 113, 0.8));
+            }
+        }
+
+        @keyframes drop {
+            0% {
+                opacity: 0;
+                transform: translateY(-1.4rem) rotate(0deg);
+            }
+
+            35% {
+                opacity: 1;
+            }
+
+            70%, 100% {
+                opacity: 0;
+                transform: translateY(4rem) rotate(180deg);
+            }
+        }
+
+        @keyframes loading-bar {
+            0% {
+                transform: translateX(-110%);
+            }
+
+            100% {
+                transform: translateX(230%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="loading-screen" aria-label="KorbKumpel wird geladen">
+        <h1 class="brand">KorbKumpel</h1>
+
+        <div class="basket-loader" aria-hidden="true">
+            <div class="basket-handle"></div>
+            <div class="basket-body"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+            <div class="item"></div>
+        </div>
+
+        <p class="loading-text">Einkaufsliste wird vorbereitet</p>
+        <div class="progress">
+            <div class="progress-bar"></div>
+        </div>
+        <p class="status">Daten werden geladen...</p>
+    </main>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const from = params.get("from");
+        const action = params.get("action");
+        const target = params.get("target");
+
+        const loadingText = document.querySelector(".loading-text");
+        const statusText = document.querySelector(".status");
+
+        if (from === "list" && action === "create") {
+            loadingText.textContent = "Liste wird generiert";
+            statusText.textContent = "Ihre Angaben werden gespeichert...";
+        }
+
+        if (target) {
+            setTimeout(() => {
+                window.location.href = target;
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
