@@ -1,0 +1,40 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import {
+    getFirestore,
+    collection,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDDVyeXu7qx6ESApel4Ew8CaQyi0tmLiHc",
+    authDomain: "korbkumpel.firebaseapp.com",
+    projectId: "korbkumpel",
+    storageBucket: "korbkumpel.firebasestorage.app",
+    messagingSenderId: "961303507171",
+    appId: "1:961303507171:web:f7c8e17cc351ad8e0455d6",
+    measurementId: "G-0PWQC24N08"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function get_list_count() {
+    const listsSnapshot = await getDocs(collection(db, "lists"));
+    return listsSnapshot.size;
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const newListButton = document.getElementById("new_list");
+    const seeListsButton = document.getElementById("open_lists");
+    const n_lists = await get_list_count();
+
+    seeListsButton.textContent = "See lists (" + n_lists + ")"
+
+    newListButton.addEventListener("click", () => {
+        window.location.href = "/app/list/create/";
+    });
+    
+    seeListsButton.addEventListener("click", () => {
+        window.location.href = "/app/list/see/";
+    })
+});

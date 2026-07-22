@@ -16,7 +16,6 @@ const firebaseConfig = {
     appId: "1:961303507171:web:f7c8e17cc351ad8e0455d6",
     measurementId: "G-0PWQC24N08"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -31,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const listsSnapshot = await getDocs(collection(db, "lists"));
         let maxId = 0;
         listsSnapshot.forEach((docSnap) => {
-            const data = doc.Snap.data();
+            const data = docSnap.data();
             if (data.listNumber > maxId) {
                 maxId = data.listNumber;
             }
@@ -61,7 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("setDoc beendet")
         console.log("liste erfolgreich übermittelt", docRef.id);
 
-        window.location.href = `../loading.html?from=list&action=create&target=list/index.html?id=${docRef.id}`;    }
+        window.location.href = `../../loading.html?from=list&action=create&target=/app/list/view?id=${docRef.id}`;
+    }
 
     createListButton.addEventListener("click", () => {
         save_list();
