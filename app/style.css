@@ -32,7 +32,7 @@
     list-style: none;
     padding: 0;
     margin: 1.5rem auto;
-    max-width: 320px;
+    max-width: 350px;
     text-align: left;
     position: relative;
 }
@@ -42,8 +42,8 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 18px;
-    width: 1px;
+    left: 19.75px;
+    width: 1.5px;
     background: green;
 }
 
@@ -63,10 +63,10 @@
 }
 
 #item_cont li label span {
-    padding-left: 14px;
+    padding-left: 5px;
     height: 25px;
     position: relative;
-    top: -1px;
+    top: 0.5px;
 }
 
 #item_cont li.list-meta {
@@ -84,8 +84,8 @@
 #item_cont li.list-meta #item_count {
     flex: 0 0 auto;
     min-width: 20px;
-    margin: 0 10px 0 0;
-    text-align: left;
+    margin: 0 5px 0 0;
+    text-align: center;
 }
 
 #item_cont li.list-meta #list_category {
@@ -204,10 +204,11 @@ button:active {
     max-width: 600px;
     margin: 1rem auto;
     text-align: left;
+    padding-right: 5;
 }
 
 .checkbox-row label {
-    margin: 0;
+    margin: 1;
 }
 
 .selected {

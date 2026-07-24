@@ -55,7 +55,7 @@ async function render_list() {
 
     const container = document.getElementById("item_cont");
     container.querySelectorAll("li:not(.list-meta)").forEach((li) => li.remove());
-    sort_list(data.content).forEach((item, index) => {
+    sort_list(data.content, 2).forEach((item, index) => {
         if (item === null) return;
 
         const li = document.createElement("li");
@@ -66,21 +66,21 @@ async function render_list() {
         checkbox.checked = item.checked;
         checkbox.addEventListener("change", (e) => {
             update_item(data.content, item.name);
-        })
+        });
 
         const label = document.createElement("label");
         const button = document.createElement("button");
         button.textContent = "🗑";
         button.type = "button";
         button.classList.add("delete-btn")
-        button.classList.add("hidden");
+        button.classList.toggle("hidden", !edit_mode);
         button.id = "button-" + index;
         button.addEventListener("click", () => {
             const ask = confirm(`Sind Sie sich sicher, dass Sie ${item.name} irreversibel löschen?`);
             if (ask) {
                 delete_item(item.name);
             }
-        })
+        });
         const span = document.createElement("span");
         span.textContent = item.name;
         span.classList.toggle("checked", item.checked);
@@ -133,14 +133,22 @@ async function update_item(list, name) {
     });
     await render_list();
 }
-function sort_list(list) {
-    list.sort((a, b) => a.name.localeCompare(b.name));
+function sort_list(list, mode) {
+    /**
+     * mode:    0: nothing
+     *          1: only checked at the end
+     *          2: alphabetical and checked at the end
+     */
+    if (mode === 1 || mode === 2) {
+        list.sort((a, b) => a.name.localeCompare(b.name));
 
-    const checked = list.filter((item) => item.checked)
-    const unchecked = list.filter((item) => !item.checked);
+        if (mode === 2) {
+            const checked = list.filter((item) => item.checked)
+            const unchecked = list.filter((item) => !item.checked);
 
-    return [...unchecked, ...checked];
-    console.log([...unchecked, ...checked]);
+            let list = [... unchecked, ...checked];
+        }};
+    return list;
 }
 
 function get_category_label(category) {
@@ -172,10 +180,9 @@ document.addEventListener("DOMContentLoaded", () => {
         addItemButton.classList.toggle("hidden");
         addItemInput.classList.add("hidden");
         addItemButton.classList.remove("selected");
-
         document.querySelectorAll(".delete-btn").forEach((item) => {
-            item.classList.toggle("hidden");
-        })
+            item.classList.toggle("hidden", !edit_mode);
+        });
     });
     addItemButton.addEventListener("click", () => {
         addItemButton.classList.toggle("selected");
@@ -190,5 +197,5 @@ document.addEventListener("DOMContentLoaded", () => {
             add_item(name);
             addItemInput.value = "";
         }
-    })
+    });
 });
