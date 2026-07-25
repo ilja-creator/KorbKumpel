@@ -27,6 +27,7 @@ const params = new URLSearchParams(window.location.search);
 const listId = params.get("id");
 
 const listDocRef = doc(db, "lists", listId);
+let sort_mode = 1;
 
 async function render_list_title() {
     const listDocSnap = await getDoc(listDocRef);
@@ -55,7 +56,7 @@ async function render_list() {
 
     const container = document.getElementById("item_cont");
     container.querySelectorAll("li:not(.list-meta)").forEach((li) => li.remove());
-    sort_list(data.content, 2).forEach((item, index) => {
+    sort_list(data.content, sort_mode).forEach((item, index) => {
         if (item === null) return;
 
         const li = document.createElement("li");
@@ -67,6 +68,9 @@ async function render_list() {
         checkbox.addEventListener("change", (e) => {
             update_item(data.content, item.name);
         });
+        const checkboxWrap = document.createElement("span");
+        checkboxWrap.classList.add("checkbox-wrap");
+        checkboxWrap.appendChild(checkbox);
 
         const label = document.createElement("label");
         const button = document.createElement("button");
@@ -85,7 +89,7 @@ async function render_list() {
         span.textContent = item.name;
         span.classList.toggle("checked", item.checked);
 
-        label.appendChild(checkbox);
+        label.appendChild(checkboxWrap);
         label.appendChild(span);
         label.appendChild(button);
 
@@ -140,14 +144,16 @@ function sort_list(list, mode) {
      *          2: alphabetical and checked at the end
      */
     if (mode === 1 || mode === 2) {
-        list.sort((a, b) => a.name.localeCompare(b.name));
+        const checked = list.filter((item) => item.checked)
+        const unchecked = list.filter((item) => !item.checked);
 
         if (mode === 2) {
-            const checked = list.filter((item) => item.checked)
-            const unchecked = list.filter((item) => !item.checked);
+            unchecked.sort((a, b) => a.name.localeCompare(b.name));
+            checked.sort((a, b) => a.name.localeCompare(b.name));
+        }
 
-            let list = [... unchecked, ...checked];
-        }};
+        return [...unchecked, ...checked];
+    }
     return list;
 }
 
@@ -170,6 +176,7 @@ let edit_mode = false;
 document.addEventListener("DOMContentLoaded", () => {
     const editButton = document.getElementById("edit_btn");
     const addItemButton = document.getElementById("add_btn");
+    const sortButton = document.getElementById("sort_btn");
     const addItemInput = document.getElementById("add_inp");
     const addItemForm = document.getElementById("added_item_form");
     render_list();
@@ -178,6 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
         edit_mode = !edit_mode;
         editButton.classList.toggle("selected");
         addItemButton.classList.toggle("hidden");
+        sortButton.classList.toggle("hidden");
         addItemInput.classList.add("hidden");
         addItemButton.classList.remove("selected");
         document.querySelectorAll(".delete-btn").forEach((item) => {
@@ -187,7 +195,12 @@ document.addEventListener("DOMContentLoaded", () => {
     addItemButton.addEventListener("click", () => {
         addItemButton.classList.toggle("selected");
         addItemInput.classList.toggle("hidden");
-    })
+    });
+    sortButton.addEventListener("click", () => {
+        sort_mode = sort_mode === 1 ? 2 : 1;
+        render_list();
+        sortButton.classList.toggle("selected");
+    });
 
     addItemForm.addEventListener("submit", (event) => {
         event.preventDefault();

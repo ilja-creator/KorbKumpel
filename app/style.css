@@ -16,6 +16,12 @@
     font-weight: normal;
     font-style: normal;
 }
+@font-face {
+    font-family: "Zen Dots", sans-serif;
+    src: url("../assets/fonts/ZenDots/ZenDots-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
 
 @keyframes fadeInUp {
     0% {
@@ -35,6 +41,7 @@
     max-width: 350px;
     text-align: left;
     position: relative;
+    --checkbox-spalte: 30px;
 }
 
 #item_cont::before {
@@ -45,6 +52,7 @@
     left: 19.75px;
     width: 1.5px;
     background: green;
+    left: var(--checkbox-spalte);
 }
 
 #item_cont li {
@@ -59,7 +67,7 @@
 
 #item_cont li label input[type="checkbox"] {
     flex: 0 0 auto;
-    margin: 0 10px 0 0;
+    margin: 0 -5px 0 0;
 }
 
 #item_cont li label span {
@@ -83,7 +91,7 @@
 
 #item_cont li.list-meta #item_count {
     flex: 0 0 auto;
-    min-width: 20px;
+    width: var(--checkbox-spalte);
     margin: 0 5px 0 0;
     text-align: center;
 }
@@ -128,7 +136,7 @@ h2 {
     margin-bottom: 0;
 }
 
-input {
+input:not([type="checkbox"]) {
     display: block;
     margin: 1.8rem 1rem 1.8rem 1.8rem;
     padding: 0.25rem 0.5rem;
@@ -232,4 +240,37 @@ button:active {
 .checked {
     color: rgba(255, 255, 255, 0.6) !important;
     accent-color: rgba(134, 173, 207, 0.8) !important;
+}
+
+.checkbox-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 18px;
+    width: 18px;
+    margin-right: 10px;
+}
+
+.button-row {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+.button-row button {
+    margin: 0 5px;
+}
+
+.app {
+    position: fixed;
+    padding: 0.3rem 0.8rem;
+    z-index: 1000;
+    left: 10% !important;
+    top: 0;
+
+    font-family: "Zen Dots";
+    font-size: clamp(1.5rem, 10vw, 2rem);
+    color: rebeccapurple;
+
+    border-radius: 0.6rem;
+    border-color: rebeccapurple !important;
 }

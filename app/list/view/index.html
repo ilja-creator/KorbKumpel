@@ -9,11 +9,14 @@
     <link rel="stylesheet" href="../../style.css">
 </head>
 <body>
-    <a href="/app/">
+    <a href="/">
         <h1>KorbKumpel</h1>
     </a>
-    <h2 id="list_title">Wird geladen ...</h2>
+    <a href="/app/">
+        <h1 class="app">APP*</h1>
+    </a>
 
+    <h2 id="list_title">Wird geladen ...</h2>
     <ul id="item_cont">
         <li class="list-meta">
             <span id="item_count"></span>
@@ -23,7 +26,10 @@
 
     <form id="added_item_form">
         <button id="edit_btn" type="button">📝</button>
-        <button id="add_btn" type="button" class="hidden">+</button>
+        <div class="button-row">
+            <button id="add_btn" type="button" class="hidden">+</button>
+            <button id="sort_btn" type="button" class="hidden">A-Z</button>
+        </div>
         <input id="add_inp" type="text" class="hidden" placeholder="Neuer Artikel">
     </form>
 
