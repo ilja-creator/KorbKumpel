@@ -274,3 +274,18 @@ button:active {
     border-radius: 0.6rem;
     border-color: rebeccapurple !important;
 }
+
+.account {
+    position: fixed;
+    padding: 0.3rem 0.8rem;
+    z-index: 1000;
+    left: 90% !important;
+    top: 0;
+
+    font-family: "Zen Dots";
+    font-size: clamp(1.5rem, 10vw, 2rem);
+    color: cadetblue;
+
+    border-radius: 0.6rem;
+    border-color: cadetblue;
+}
