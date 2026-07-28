@@ -83,3 +83,14 @@ button {
 
     animation: fadeInUp 0.8s ease-out forwards;
 }
+
+.center {
+    text-align: center !important;
+}
+
+.info {
+    text-align: left !important;
+}
+.info h3 {
+    text-decoration: underline;
+}

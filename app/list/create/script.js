@@ -36,8 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
         const nextId = maxId + 1;
-        console.log("anzahl bestehender listen:", listsSnapshot.size);
-        console.log("id:", nextId);
         const listName = name_list.value.trim()
 
         if (listName === "") {
@@ -48,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Stimmen Sie zuerst zu, um eine neue Liste zu erstellen!")
             return;
         }
-        console.log("alle bedingungen erfüllt");
         const docRef = doc(db, "lists", String(nextId));
         await setDoc(docRef, {
             category: category.value,
@@ -57,8 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
             listNumber: nextId,
             name: listName
         });
-        console.log("setDoc beendet")
-        console.log("liste erfolgreich übermittelt", docRef.id);
 
         window.location.href = `../../loading.html?from=list&action=create&target=/app/list/view?id=${docRef.id}`;
     }

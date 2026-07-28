@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#4CAF50">
+    <title>KorbKumpel – Startseite</title>
+    <link rel="icon" type="image/png" href="../../../../assets/image/icon.png">
+    <link rel="stylesheet" href="../../../style.css">
+</head>
+<body>
+<a href="//">
+    <h1>KorbKumpel</h1>
+</a>
+<a href="/app/">
+    <h1 class="app">APP*</h1>
+</a>
+<h2>Registrierung</h2>
+<input id="email" placeholder="E-Mail-Adresse" type="text" >
+<select id="type" name="Nutzungstyp" required>
+    <option value="user">Standard-Benutzer</option>
+    <option value="special">Sonder-Nutzer</option>
+    <option value="with">Mitnutzer</option>
+    <option value="admin">Administrator</option>
+    <option value="dev">Entwickler</option>
+</select>
+<input id="password" placeholder="Passwort" type="password">
+
+<button id="login">Registrieren</button>
+<label id="error"></label>
+
+<a href="/information/#register" target="_blank">
+    Sie benötigen Hilfe?
+</a>
+<a id="password-info" href="/information/#password-requirements" target="_blank" class="hidden">
+    Passwortanforderungen
+</a>
+
+<script type="module" src="script.js"></script>
+</body>
+</html>
