@@ -2,20 +2,20 @@ import {permissions} from "/assets/docs/permissions.js";
 import {signs} from '/assets/docs/signs.js';
 import {emailLinks} from '/assets/docs/email-links.js';
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import {
     getFirestore,
     collection,
     doc,
     getDocs,
     setDoc,
-    deleteDoc
+    deleteDoc,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import {
     getAuth,
     createUserWithEmailAndPassword,
     sendEmailVerification,
-    deleteUser,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
@@ -33,21 +33,25 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-async function new_account(email, password, user_type) {
+async function new_account(email, username, password, user_type) {
     try {
         const credential = await createUserWithEmailAndPassword(auth, email, password);
         const user = credential.user;
-        await sendEmailVerification(user);
+        const actionCodeSettings = {
+            url: window.location.origin + "/app/account/registration/register/verified/",
+            handleCodeInApp: false
+        };
+
+        await sendEmailVerification(user, actionCodeSettings);
         await setDoc(doc(db, "accounts", user.uid), {
             email: email,
+            username: username,
             user_type: user_type,
             created_at: new Date(),
             confirmed: false
         });
-        alert("Es wurde eine E-Mail an " + email + " geschickt. Bitte bestätigen Sie die Registreirung!")
-        if (email.endsWith("@gmail.com")) {
-            window.open("https://www.gmail.com", "_blank");
-        }
+        alert("Es wurde eine E-Mail an " + email + " geschickt. Bitte bestätigen Sie die Registrierung!")
+        forwarding(email);
     } catch (error) {
         console.error(error);
         if (error.code === "auth/email-already-in-use") { alert("Sie können nur einen Account haben!") }
@@ -61,11 +65,11 @@ async function check_pw(email, password) {
 
     const all_categories = [signs.lowerCaseSigns, signs.upperCaseSigns, signs.numberSigns, signs.specialCharacters];
     if (pw.length < 8) {
-        console.log("Error – Too short")
+        console.log("Error – Too short (" + pw.length + "/8)");
         return false;
     } for (const category of all_categories) {
         if (!category.some((sign) => password.includes(sign))) {
-            console.log("Error – Missing letter type")
+            console.log("Error – Missing letter type (" + category + ")");
             return false;
         }
     }
@@ -96,22 +100,28 @@ async function username_exists(new_username) {
 
     for (const account of accountsSnapshot.docs) {
         const data = account.data();
-        const username = data.username.value.trim().toLowerCase();
 
-        if (new_username.value.trim().toLowerCase() === username) {
+        if (!data.username) {
+            continue;
+        }
+
+        const username = data.username.toLowerCase();
+
+        if (new_username.trim().toLowerCase() === username) {
             return true;
         }
     }
     return false;
 }
-async function email_exists(new_email) {
+async function email_exists(new_email, new_type) {
     const accountsSnapshot = await getDocs(collection(db, "accounts"));
 
     for (const account of accountsSnapshot.docs) {
         const data = account.data();
-        const email = data.email.value.trim().toLowerCase();
+        const email = data.email.trim().toLowerCase();
+        const type = data.user_type.trim();
 
-        if (new_email.value.trim().toLowerCase() === email) {
+        if (new_email.trim().toLowerCase() === email && new_type === type) {
             return true;
         }
     }
@@ -119,8 +129,12 @@ async function email_exists(new_email) {
 }
 
 async function forwarding(email) {
-    for (emailLink of emailLinks) {
-        if (email.endsWith(emailLink[0])) { link = emailLink[1] }
+    let link = null;
+    for (const emailLink of emailLinks) {
+        if (email.endsWith(emailLink[0])) {
+            link = emailLink[1]
+            break;
+        }
     }
     if (link !== null) {
         window.open("https://" + link, "_blank");
@@ -130,21 +144,22 @@ async function forwarding(email) {
 
 document.addEventListener("DOMContentLoaded", async () => {
     const emailInput = document.getElementById("email");
-    const username = document.getElementById("username").value;
+    const usernameInput = document.getElementById("username");
     const typeInput = document.getElementById("type");
     const passwordInput = document.getElementById("password");
     const registerButton = document.getElementById("login");
 
     registerButton.addEventListener("click", async () => {
         const email = emailInput.value.trim().toLowerCase();
+        const username = usernameInput.value.trim();
         const type = typeInput.value;
         const pw = passwordInput.value;
         const pwInfo = document.getElementById("password-info");
         if (!email.includes("@") || !email.includes(".")) {
             alert("Bitte geben Sie eine gültige E-Mail-Adresse ein!");
-        } else if (username_exists(username)) {
+        } else if (await username_exists(username)) {
             alert("Dieser Benutzername existiert schon. Bitte wählen Sie einen anderen!");
-        } else if (email_exists(email)) {
+        } else if (await email_exists(email, type)) {
             alert("Sie können nur ein Konto erstellen!")
         } else if (type === "admin" && !permissions.admin.includes(email)) {
             alert("Sie haben leider keine Berechtigung auf ein AdministratorInnenkonto!");
@@ -159,7 +174,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             pwInfo.classList.toggle("hidden", false);
         }
         else {
-            new_account(email, pw, type);
+            new_account(email, username, pw, type);
         }
     });
 });
@@ -178,10 +193,5 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (difference > 1) { await deleteDoc(doc(db, "accounts", account.id)); }
         }
     }
-});
-
-onAuthStateChanged(auth, async (user) => {
-    if (user && user.emailVerified) {
-        await updateDoc(doc(db, "accounts", user.uid), { confirmed: true });
-    }
+    console.log(window.location.origin);
 });

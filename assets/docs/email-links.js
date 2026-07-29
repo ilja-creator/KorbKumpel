@@ -1,15 +1,15 @@
-export const emailLinks = {
-    "@gmail.com": "mail.google.com",
-    "outlook.com": "outlook.live.com/mail/",
-    "hotmail.com": "outlook.live.com/mail/",
-    "live.com": "outlook.live.com/mail/",
-    "@gmx.at": "www.gmx.net/mail/",
-    "@gmx.net": "www.gmx.net/mail/",
-    "@gmx.de": "www.gmx.net/mail/",
-    "@yahoo.com": "mail.yahoo.com",
-    "@yahoo.de": "mail.yahoo.com",
-    "@web.de": "web.de",
-    "@icloud.com": "icloud.com/email",
-    "@aon.at": "webmail.aon.at/",
-    "@chello.at": "webmail.aon.at/",
-}
+export const emailLinks = [
+    ["@gmail.com", "mail.google.com"],
+    ["@outlook.com", "outlook.live.com/mail/"],
+    ["@hotmail.com", "outlook.live.com/mail/"],
+    ["@live.com", "outlook.live.com/mail/"],
+    ["@gmx.at", "www.gmx.net/mail/"],
+    ["@gmx.net", "www.gmx.net/mail/"],
+    ["@gmx.de", "www.gmx.net/mail/"],
+    ["@yahoo.com", "mail.yahoo.com"],
+    ["@yahoo.de", "mail.yahoo.com"],
+    ["@web.de", "web.de"],
+    ["@icloud.com", "www.icloud.com/email"],
+    ["@aon.at", "webmail.aon.at/"],
+    ["@chello.at", "webmail.aon.at/"]
+]
