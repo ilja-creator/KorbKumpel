@@ -42,13 +42,13 @@ async function new_account(email, password, user_type) {
             confirmed: false
         });
         alert("Es wurde eine E-Mail an " + email + " geschickt. Bitte bestätigen Sie die Registreirung!")
-        if (email.ensWith("@gmail.com")) {
+        if (email.endsWith("@gmail.com")) {
             window.open("https://www.gmail.com", "_blank");
         }
     } catch (error) {
         console.error(error);
         if (error.code === "auth/email-already-in-use") { alert("Sie können nur einen Account haben!") }
-        alert("Es ist ein unerwarteter Fehler aufgetreten! Bitte melden Sie sich bei den Entwicklern" + error.message);
+        alert("Es ist ein unerwarteter Fehler aufgetreten! Bitte melden Sie sich bei den Entwicklern. Error-Info: " + error.message);
     }
 }
 
@@ -58,28 +58,34 @@ async function check_pw(email, password) {
 
     const all_categories = [signs.lowerCaseSigns, signs.upperCaseSigns, signs.numberSigns, signs.specialCharacters];
     if (pw.length < 8) {
+        console.log("Error – Too short")
         return false;
     } for (const category of all_categories) {
         if (!category.some((sign) => password.includes(sign))) {
+            console.log("Error – Missing letter type")
             return false;
         }
     }
 
     let string = "";
     if (pw.includes(email_1)) {
+        console.log("Error – Includes E-Mail-Name")
         return false;
     }
     for (const sign of email_1) {
         if (sign === ".") {
             if (pw.includes(string)) {
+                console.log("Error – Includes E-Mail-Name")
                 return false;
             }
             string = "";
         } else { string += sign;}
     }
     if (pw.includes(string)) {
+        console.log("Error – Includes E-Mail-Name")
         return false;
     }
+    console.log("Password check -> Positive")
     return true;
 }
 
