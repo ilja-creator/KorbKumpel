@@ -33,6 +33,30 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        return;
+    }
+
+    await user.reload();
+
+    if(user.emailVerified) {
+        await updateDoc(doc(db, "accounts", user.uid), { confirmed: true });
+
+        const lastLogIn = new Date (user.metadata.lastSignInTime);
+        const missing_days = (Date.now() - lastLogIn) / (1000 * 60 * 60 * 24);
+        if (missing_days > 5) {
+            await signOut(auth)
+            return;
+        } else {
+            alert("Sie sind bereits angemeldet!");
+            window.location.href = "/app/";
+            return;
+        }
+    }
+    alert("Sie haben schon ein Konto! Bitte verifizieren Sie jedoch zuerst die E-Mail!");
+});
+
 async function new_account(email, username, password, user_type) {
     try {
         const credential = await createUserWithEmailAndPassword(auth, email, password);

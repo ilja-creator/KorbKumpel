@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="theme-color" content="#4CAF50">
     <title>KorbKumpel – Startseite</title>
-    <link rel="icon" type="image/png" href="../../../assets/image/icon.png">
-    <link rel="stylesheet" href="../../style.css">
+    <link rel="icon" type="image/png" href="../../../../assets/image/icon.png">
+    <link rel="stylesheet" href="../../../style.css">
 </head>
 <body>
 <a href="//">
@@ -15,10 +15,17 @@
 <a href="/app/">
     <h1 class="app">APP*</h1>
 </a>
-<h2>Registrierung / Anmeldung</h2>
-<button id="register">Registrieren</button>
+<h2>Anmeldung</h2>
+
+<input id="email" placeholder="E-Mail-Adresse" type="text" >
+<input id="password" placeholder="Passwort" type="password">
+
 <button id="login">Anmelden</button>
-<button id="logout" class="selected">Abmelden</button>
+<label id="error"></label>
+
+<a href="/information/#login" target="_blank">
+    Sie benötigen Hilfe?
+</a>
 
 <script type="module" src="script.js"></script>
 </body>
