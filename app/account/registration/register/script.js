@@ -1,5 +1,6 @@
 import {permissions} from "/assets/docs/permissions.js";
 import {signs} from '/assets/docs/signs.js';
+import {emailLinks} from '/assets/docs/email-links.js';
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import {
@@ -13,7 +14,9 @@ import {
 import {
     getAuth,
     createUserWithEmailAndPassword,
-    sendEmailVerification
+    sendEmailVerification,
+    deleteUser,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -88,9 +91,46 @@ async function check_pw(email, password) {
     console.log("Password check -> Positive")
     return true;
 }
+async function username_exists(new_username) {
+    const accountsSnapshot = await getDocs(collection(db, "accounts"));
+
+    for (const account of accountsSnapshot.docs) {
+        const data = account.data();
+        const username = data.username.value.trim().toLowerCase();
+
+        if (new_username.value.trim().toLowerCase() === username) {
+            return true;
+        }
+    }
+    return false;
+}
+async function email_exists(new_email) {
+    const accountsSnapshot = await getDocs(collection(db, "accounts"));
+
+    for (const account of accountsSnapshot.docs) {
+        const data = account.data();
+        const email = data.email.value.trim().toLowerCase();
+
+        if (new_email.value.trim().toLowerCase() === email) {
+            return true;
+        }
+    }
+    return false;
+}
+
+async function forwarding(email) {
+    for (emailLink of emailLinks) {
+        if (email.endsWith(emailLink[0])) { link = emailLink[1] }
+    }
+    if (link !== null) {
+        window.open("https://" + link, "_blank");
+    }
+}
+
 
 document.addEventListener("DOMContentLoaded", async () => {
     const emailInput = document.getElementById("email");
+    const username = document.getElementById("username").value;
     const typeInput = document.getElementById("type");
     const passwordInput = document.getElementById("password");
     const registerButton = document.getElementById("login");
@@ -102,6 +142,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         const pwInfo = document.getElementById("password-info");
         if (!email.includes("@") || !email.includes(".")) {
             alert("Bitte geben Sie eine gültige E-Mail-Adresse ein!");
+        } else if (username_exists(username)) {
+            alert("Dieser Benutzername existiert schon. Bitte wählen Sie einen anderen!");
+        } else if (email_exists(email)) {
+            alert("Sie können nur ein Konto erstellen!")
         } else if (type === "admin" && !permissions.admin.includes(email)) {
             alert("Sie haben leider keine Berechtigung auf ein AdministratorInnenkonto!");
         } else if (type === "dev" && !permissions.dev.includes(email)) {
@@ -118,4 +162,26 @@ document.addEventListener("DOMContentLoaded", async () => {
             new_account(email, pw, type);
         }
     });
+});
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const accountsSnapshot = await getDocs(collection(db, "accounts"));
+    const now = new Date();
+
+    for (const account of accountsSnapshot.docs) {
+        const data = account.data();
+
+        if (!data.confirmed) {
+            const createdAt = data.created_at.toDate();
+            const difference = (now - createdAt) / (1000 * 60 * 60 * 24);
+
+            if (difference > 1) { await deleteDoc(doc(db, "accounts", account.id)); }
+        }
+    }
+});
+
+onAuthStateChanged(auth, async (user) => {
+    if (user && user.emailVerified) {
+        await updateDoc(doc(db, "accounts", user.uid), { confirmed: true });
+    }
 });
