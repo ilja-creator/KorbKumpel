@@ -3,9 +3,15 @@ import {
     getFirestore,
     collection,
     doc,
+    updateDoc,
     setDoc,
     getDocs
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import {
+    getAuth,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDDVyeXu7qx6ESApel4Ew8CaQyi0tmLiHc",
@@ -18,10 +24,11 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 document.addEventListener("DOMContentLoaded", () => {
     const name_list = document.getElementById("list")
-    const acception = document.getElementById("acception");
+    const acceptance = document.getElementById("acceptance");
     const category = document.getElementById("category");
     const createListButton = document.getElementById("create_list");
 
@@ -41,18 +48,19 @@ document.addEventListener("DOMContentLoaded", () => {
         if (listName === "") {
             alert("Geben Sie einen Namen für die Liste ein!")
             return;
-        }
-        if (!acception.checked) {
+        } if (!acceptance.checked) {
             alert("Stimmen Sie zuerst zu, um eine neue Liste zu erstellen!")
             return;
         }
+
         const docRef = doc(db, "lists", String(nextId));
         await setDoc(docRef, {
             category: category.value,
             createdAt: new Date(),
             content: [null],
             listNumber: nextId,
-            name: listName
+            name: listName,
+            createdBy: auth.currentUser.uid
         });
 
         window.location.href = `../../loading.html?from=list&action=create&target=/app/list/view?id=${docRef.id}`;
@@ -60,5 +68,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
     createListButton.addEventListener("click", () => {
         save_list();
-    })
-})
+    });
+});
+
+onAuthStateChanged(auth, async (user) => {
+    const createListButton = document.getElementById("create_list");
+
+    if (!user) {
+        alert("Sie sind nicht angemeldet!");
+        window.location.href="/app/account/registration/";
+        return;
+    } if(user.emailVerified) {
+        await updateDoc(doc(db, "accounts", user.uid), { confirmed: true });
+
+        const lastLogIn = new Date (user.metadata.lastSignInTime);
+        const missing_days = (new Date() - lastLogIn) / (1000 * 60 * 60 * 24);
+        if (missing_days > 5) {
+            await signOut(auth);
+            alert("Sie wurde aufgrund eines Timeouts abgemeldet. Bitte melden Sie sich erneut an!");
+            window.location.href = "/app/account/registration/login/";
+            return;
+        } else {
+            createListButton.classList.toggle("selected", false);
+            return;
+        }
+    }
+
+    alert("Sie haben schon ein Konto! Bitte verifizieren Sie jedoch zuerst die E-Mail!");
+});

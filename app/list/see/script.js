@@ -7,6 +7,9 @@ import {
     getDoc,
     getDocs
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import {
+    getAuth
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDDVyeXu7qx6ESApel4Ew8CaQyi0tmLiHc",
@@ -19,6 +22,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 let selected = null;
 let selectedButton = null;
@@ -48,28 +52,31 @@ async function render_list_buttons() {
 
     listsSnapshot.forEach(async (doc) => {
         const data = doc.data();
-        const count = await get_content_count(doc.id);
-        const category = get_category_label(data.category);
+        if (auth.currentUser.uid === data.createdBy) {
+            const count = await get_content_count(doc.id);
+            const category = get_category_label(data.category);
 
-        const button = document.createElement("button");
-        button.textContent = data.name + "(" + count + ")" + " [" + category + "]";
-        button.dataset.id = doc.id;
+            const button = document.createElement("button");
+            button.textContent = data.name + "(" + count + ")" + " [" + category + "]";
+            button.dataset.id = doc.id;
 
-        button.addEventListener("click", () => {
-            if (button.classList.contains("selected")) {
-                button.classList.remove("selected");
-                selected = null;
-                selectedButton = null;
-            } else {
-                if (selectedButton !== null) {
-                    selectedButton.classList.remove("selected");
+            button.addEventListener("click", () => {
+                if (button.classList.contains("selected")) {
+                    button.classList.remove("selected");
+                    selected = null;
+                    selectedButton = null;
+                } else {
+                    if (selectedButton !== null) {
+                        selectedButton.classList.remove("selected");
+                    }
+                    button.classList.add("selected");
+                    selected = doc.id;
+                    selectedButton = button;
                 }
-                button.classList.add("selected");
-                selected = doc.id;
-                selectedButton = button;
-        }})
-        container.appendChild(button);
-    })
+            })
+            container.appendChild(button);
+        }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {

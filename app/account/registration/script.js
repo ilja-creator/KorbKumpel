@@ -75,7 +75,7 @@ onAuthStateChanged(auth, async (user) => {
         await updateDoc(doc(db, "accounts", user.uid), { confirmed: true });
 
         const lastLogIn = new Date (user.metadata.lastSignInTime);
-        const missing_days = (Date.now() - lastLogIn) / (1000 * 60 * 60 * 24);
+        const missing_days = (new Date() - lastLogIn) / (1000 * 60 * 60 * 24);
         if (missing_days > 5) {
             await signOut(auth)
             return;

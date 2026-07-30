@@ -2,8 +2,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/fireba
 import {
     getFirestore,
     collection,
-    getDocs
+    doc,
+    getDocs,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import {
+    getAuth,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDDVyeXu7qx6ESApel4Ew8CaQyi0tmLiHc",
@@ -17,6 +24,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 async function get_list_count() {
     const listsSnapshot = await getDocs(collection(db, "lists"));
@@ -37,4 +45,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     seeListsButton.addEventListener("click", () => {
         window.location.href = "/app/list/see/";
     })
+});
+
+onAuthStateChanged(auth, async (user) => {
+    const createButton = document.getElementById("new_list");
+    const seeListsButton = document.getElementById("open_lists");
+
+    if (!user) {
+        alert("Bitte melden Sie sich zuerst an!");
+        window.location.href = "/app/account/registration/";
+        return;
+    }
+
+    await user.reload();
+
+    if(user.emailVerified) {
+        await updateDoc(doc(db, "accounts", user.uid), { confirmed: true });
+
+        const lastLogIn = new Date (user.metadata.lastSignInTime);
+        const missing_days = (new Date() - lastLogIn) / (1000 * 60 * 60 * 24);
+        if (missing_days > 5) {
+            await signOut(auth);
+            alert("Sie wurde aufgrund eines Timeouts abgemeldet. Bitte melden Sie sich erneut an!");
+            window.location.href = "/app/account/registration/login/";
+            return;
+        } else {
+            createButton.classList.toggle("selected", false);
+            seeListsButton.classList.toggle("selected", false);
+            return;
+        }
+    }
+
+    alert("Sie haben schon ein Konto! Bitte verifizieren Sie jedoch zuerst die E-Mail!");
 });
