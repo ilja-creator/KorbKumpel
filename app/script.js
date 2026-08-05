@@ -32,6 +32,13 @@ async function get_list_count() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+    const params = new URLSearchParams(window.location.search);
+    const con = params.get("con");
+
+    if (con === null) {
+        window.location.href = `/app/loading/?from=hp&action=load_app&target=/app/?con=true`;
+    }
+
     const newListButton = document.getElementById("new_list");
     const seeListsButton = document.getElementById("open_lists");
     const n_lists = await get_list_count();
@@ -44,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     seeListsButton.addEventListener("click", () => {
         window.location.href = "/app/list/see/";
-    })
+    });
 });
 
 onAuthStateChanged(auth, async (user) => {

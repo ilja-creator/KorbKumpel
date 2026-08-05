@@ -1,6 +1,5 @@
 import {permissions} from "/assets/docs/permissions.js";
 import {signs} from '/assets/docs/signs.js';
-import {emailLinks} from '/assets/docs/email-links.js';
 
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import {
@@ -74,8 +73,7 @@ async function new_account(email, username, password, user_type) {
             created_at: new Date(),
             confirmed: false
         });
-        alert("Es wurde eine E-Mail an " + email + " geschickt. Bitte bestätigen Sie die Registrierung!")
-        forwarding(email);
+        window.location.href = "/app/loading/?from=register&action=create&target=/app/account/registration/register/confirmation/";
     } catch (error) {
         console.error(error);
         if (error.code === "auth/email-already-in-use") { alert("Sie können nur einen Account haben!") }
@@ -152,25 +150,12 @@ async function email_exists(new_email, new_type) {
     return false;
 }
 
-async function forwarding(email) {
-    let link = null;
-    for (const emailLink of emailLinks) {
-        if (email.endsWith(emailLink[0])) {
-            link = emailLink[1]
-            break;
-        }
-    }
-    if (link !== null) {
-        window.open("https://" + link, "_blank");
-    }
-}
-
-
 document.addEventListener("DOMContentLoaded", async () => {
     const emailInput = document.getElementById("email");
     const usernameInput = document.getElementById("username");
     const typeInput = document.getElementById("type");
     const passwordInput = document.getElementById("password");
+    const sec_passwordInput = document.getElementById("check_password");
     const registerButton = document.getElementById("login");
 
     registerButton.addEventListener("click", async () => {
@@ -178,6 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const username = usernameInput.value.trim();
         const type = typeInput.value;
         const pw = passwordInput.value;
+        const s_pw = sec_passwordInput.value;
         const pwInfo = document.getElementById("password-info");
         if (!email.includes("@") || !email.includes(".")) {
             alert("Bitte geben Sie eine gültige E-Mail-Adresse ein!");
@@ -196,6 +182,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         } else if (!await check_pw(email, pw)) {
             alert("Dieses Passwort ist zu unsicher! Um die Passwortanforderungen zu lesen, klicken Sie auf den Link unten!");
             pwInfo.classList.toggle("hidden", false);
+        } else if (pw !== s_pw) {
+            alert("Die Passwörter stimmen nicht überein!");
         }
         else {
             new_account(email, username, pw, type);

@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
             createdBy: auth.currentUser.uid
         });
 
-        window.location.href = `../../loading.html?from=list&action=create&target=/app/list/view?id=${docRef.id}`;
+        window.location.href = `/app/loading/?from=list&action=create&target=/app/list/view?id=${docRef.id}`;
     }
 
     createListButton.addEventListener("click", () => {

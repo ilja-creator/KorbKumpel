@@ -5,18 +5,18 @@
     <meta charset="UTF-8">
     <meta name="theme-color" content="#000000">
     <title>KorbKumpel lädt</title>
-    <link rel="icon" type="image/png" href="../assets/image/icon.png">
+    <link rel="icon" type="image/png" href="../../assets/image/icon.png">
     <style>
         @font-face {
             font-family: "Black Ops One";
-            src: url("../assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf") format("truetype");
+            src: url("../../assets/fonts/Black_Ops_One/BlackOpsOne-Regular.ttf") format("truetype");
             font-weight: normal;
             font-style: normal;
         }
 
         @font-face {
             font-family: "Zain";
-            src: url("../assets/fonts/Zain/Zain-Regular.ttf") format("truetype");
+            src: url("../../assets/fonts/Zain/Zain-Regular.ttf") format("truetype");
             font-weight: normal;
             font-style: normal;
         }
@@ -229,16 +229,26 @@
 
         const loadingText = document.querySelector(".loading-text");
         const statusText = document.querySelector(".status");
+        let wait = 0;
 
         if (from === "list" && action === "create") {
             loadingText.textContent = "Liste wird generiert";
             statusText.textContent = "Ihre Angaben werden gespeichert...";
+            wait = 5000;
+        } else if (from === "register" && action === "create") {
+            loadingText.textContent = "Account wird registriert";
+            statusText.textContent = "Ihre Angaben werden gespeichert...";
+            wait = 8000;
+        } else if (from === "hp" && action === "load_app") {
+            loadingText.textContent = "App wird geladen";
+            statusText.textContent = "Wir bereiten alles für Sie vor...";
+            wait = 1500;
         }
 
         if (target) {
             setTimeout(() => {
                 window.location.href = target;
-            }, 5000);
+            }, wait);
         }
     </script>
 </body>

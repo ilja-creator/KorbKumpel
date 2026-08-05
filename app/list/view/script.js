@@ -139,7 +139,7 @@ async function update_item(list, name) {
 }
 function sort_list(list, mode) {
     /**
-     * mode:    0: nothing
+     * modes:   0: nothing
      *          1: only checked at the end
      *          2: alphabetical and checked at the end
      */
