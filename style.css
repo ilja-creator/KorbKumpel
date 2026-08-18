@@ -29,7 +29,7 @@
 }
 
 body {
-    background-color: #000;
+    background-color: rgb(0, 0, 0);
     color: #fff;
     margin: 2rem;
     padding-top: 6rem;
@@ -50,6 +50,7 @@ h1 {
 
     border-bottom: 2px solid darkgreen;
     padding: 0.3rem 0.3rem;
+    border-radius: 0 0 5px 5px;
 
     background-color: #000;
     z-index: 1000;

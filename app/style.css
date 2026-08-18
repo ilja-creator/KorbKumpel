@@ -122,6 +122,7 @@ h1 {
 
     border-bottom: 2px solid darkgreen;
     padding: 0.3rem 0.3rem;
+    border-radius: 0 0 5px 5px;
 
     background-color: #000;
     z-index: 1000;
@@ -260,27 +261,31 @@ button:active {
     margin: 0 5px;
 }
 
-.app {
+.app, .account {
     position: fixed;
+    top: 1rem;
+
+    border-bottom: 2px solid;
+
+    z-index: 1000;
+}
+.app {
     padding: 0.3rem 0.8rem;
     z-index: 1000;
-    left: 10% !important;
-    top: 0;
+    left: 1rem;
 
     font-family: "Zen Dots";
     font-size: clamp(1.5rem, 10vw, 2rem);
     color: rebeccapurple;
 
     border-radius: 0.6rem;
-    border-color: rebeccapurple !important;
+    border-color: rebeccapurple;
 }
 
 .account {
-    position: fixed;
     padding: 0.3rem 0.8rem;
     z-index: 1000;
-    left: 90% !important;
-    top: 0;
+    right: 0.5rem;
 
     font-family: "Zen Dots";
     font-size: clamp(1.5rem, 10vw, 2rem);
@@ -288,4 +293,94 @@ button:active {
 
     border-radius: 0.6rem;
     border-color: cadetblue;
+}
+
+.menu-toggle {
+    display: none;
+    font-size: 2rem;
+    padding: 0.5rem 0.8rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.menu {
+    display: flex;
+    gap: 12px;
+}
+
+.menu.hidden {
+    display: none;
+}
+
+@media (max-width: 625px) {
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 9rem;
+        height: 100vh;
+        background: #222;
+        z-index: 1001;
+        opacity: 0;
+        transform: translateX(-100%);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        pointer-events: none;
+    }
+    .app,
+    .account {
+        position: static;
+        left: auto !important;
+        top: 0;
+        font-size: 1.8rem;
+        padding: 0.25rem 0;
+        z-index: 1002;
+    }
+    .menu-toggle {
+        display: block;
+        position: fixed;
+        top: 1rem;
+        left: 3rem;
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: green;
+        z-index: 1002;
+    }
+
+    .menu {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 6rem;
+        left: 1rem;
+        background: none;
+        padding: 6px;
+        border-radius: 0.6rem;
+        z-index: 1002;
+
+        opacity: 0;
+        transform: translateX(-20px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        transition-delay: 0s;
+        pointer-events: none;
+    }
+
+    body.menu-open .menu {
+        opacity: 1;
+        transform: translateX(0);
+        transition-delay: 0.15s;
+        pointer-events: auto;
+    }
+
+    .menu.open {
+        display: flex;
+    }
+    body.menu-open::before {
+        opacity: 1;
+        transform: translateX(0);
+        pointer-events: auto;
+    }
 }

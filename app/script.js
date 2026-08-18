@@ -52,6 +52,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     seeListsButton.addEventListener("click", () => {
         window.location.href = "/app/list/see/";
     });
+
+    const toggleBtn = document.querySelector('.menu-toggle');
+    const menu = document.querySelector('.menu');
+
+    toggleBtn.addEventListener("click", () => {
+        menu.classList.toggle("open");
+        document.body.classList.toggle("menu-open");
+    });
 });
 
 onAuthStateChanged(auth, async (user) => {
