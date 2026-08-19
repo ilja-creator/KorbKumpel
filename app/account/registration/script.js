@@ -34,57 +34,63 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const registerButton = document.getElementById("register");
-    const loginButton = document.getElementById("login");
-    const logoutButton = document.getElementById("logout");
-
-    registerButton.addEventListener("click", () => {
-        window.location.href = "/app/account/registration/register/";
-    });
-
-    loginButton.addEventListener("click", () => {
-        window.location.href = "/app/account/registration/login/";
-    });
-
-    logoutButton.addEventListener("click", async() => {
-        const user = auth.currentUser;
-        if (user) {
-            await signOut(auth);
-
-           window.close();
-           setTimeout(() => {
-               window.location.href = "/";
-           }, 500);
-        } else {
-            alert("Diese Funktion ist nur verfügbar, wenn Sie angemeldet sind!");
-        }
-    });
-});
-
 onAuthStateChanged(auth, async (user) => {
-    const signOutButton = document.getElementById("logout");
-
     if (!user) {
         return;
     }
 
     await user.reload();
 
-    if(user.emailVerified) {
-        await updateDoc(doc(db, "accounts", user.uid), { confirmed: true });
+    if (user.emailVerified) {
+        await updateDoc(doc(db, "accounts", user.uid), {confirmed: true});
 
-        const lastLogIn = new Date (user.metadata.lastSignInTime);
+        const lastLogIn = new Date(user.metadata.lastSignInTime);
         const missing_days = (new Date() - lastLogIn) / (1000 * 60 * 60 * 24);
         if (missing_days > 5) {
             await signOut(auth)
             return;
         } else {
             alert("Sie sind bereits angemeldet!");
-            signOutButton.classList.toggle("selected", false);
+            document.getElementById("logout").classList.toggle("selected", false);
+            document.getElementById("login").classList.toggle("selected", true);
+            document.getElementById("register").classList.toggle("selected", true);
             return;
         }
     }
 
     alert("Sie haben schon ein Konto! Bitte verifizieren Sie jedoch zuerst die E-Mail!");
+});
+
+const registerButton = document.getElementById("register");
+const loginButton = document.getElementById("login");
+const logoutButton = document.getElementById("logout");
+
+registerButton.addEventListener("click", () => {
+    if (!auth.currentUser) { window.location.href = "/app/account/registration/register/"; }
+    else { alert("Sie sind bereits angemeldet!"); }
+});
+
+loginButton.addEventListener("click", () => {
+    if (!auth.currentUser) { window.location.href = "/app/account/registration/login/"; }
+    else { alert("Sie sind bereits angemeldet!"); }
+});
+
+logoutButton.addEventListener("click", async() => {
+    if (auth.currentUser) {
+        await signOut(auth);
+        window.close();
+        setTimeout(() => {
+            window.location.href = "/";
+        }, 500);
+    } else {
+        alert("Diese Funktion ist nur verfügbar, wenn Sie angemeldet sind!");
+    }
+});
+
+const toggleBtn = document.querySelector('.menu-toggle');
+const menu = document.querySelector('.menu');
+
+toggleBtn.addEventListener("click", () => {
+    menu.classList.toggle("open");
+    document.body.classList.toggle("menu-open");
 });

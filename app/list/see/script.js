@@ -50,15 +50,15 @@ async function render_list_buttons() {
     const container = document.getElementById("list_cont");
     const listsSnapshot = await getDocs(collection(db, "lists"));
 
-    listsSnapshot.forEach(async (doc) => {
-        const data = doc.data();
+    for (const docSnap of listsSnapshot.docs) {
+        const data = docSnap.data();
         if (auth.currentUser.uid === data.createdBy) {
-            const count = await get_content_count(doc.id);
+            const count = await get_content_count(docSnap.id);
             const category = get_category_label(data.category);
 
             const button = document.createElement("button");
             button.textContent = data.name + "(" + count + ")" + " [" + category + "]";
-            button.dataset.id = doc.id;
+            button.dataset.id = docSnap.id;
 
             button.addEventListener("click", () => {
                 if (button.classList.contains("selected")) {
@@ -70,23 +70,35 @@ async function render_list_buttons() {
                         selectedButton.classList.remove("selected");
                     }
                     button.classList.add("selected");
-                    selected = doc.id;
+                    selected = docSnap.id;
                     selectedButton = button;
                 }
-            })
+            });
             container.appendChild(button);
         }
-    });
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    render_list_buttons();
-
-    const selectListButton = document.getElementById("select_list");
+    const selectedListButton = document.getElementById("select_list");
 
     selectListButton.addEventListener("click", () => {
         if (selected !== null) {
             window.location.href = "/app/list/view?id=" + selected;
         }
-    })
-})
+    });
+
+    const toggleBtn = document.querySelector('.menu-toggle');
+    const menu = document.querySelector('.menu');
+
+    toggleBtn.addEventListener("click", () => {
+        menu.classList.toggle("open");
+        document.body.classList.toggle("menu-open");
+    });
+});
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        render_list_buttons();
+    }
+});

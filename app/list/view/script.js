@@ -36,7 +36,7 @@ async function render_list_title() {
         document.getElementById("name").textContent = listDocSnap.data().listName;
     }
     else {
-        window.location.href = "../../errors/404/index.html";
+        window.location.href = "/errors/404/";
     }
 }
 
@@ -210,5 +210,13 @@ document.addEventListener("DOMContentLoaded", () => {
             add_item(name);
             addItemInput.value = "";
         }
+    });
+
+    const toggleBtn = document.querySelector('.menu-toggle');
+    const menu = document.querySelector('.menu');
+
+    toggleBtn.addEventListener("click", () => {
+        menu.classList.toggle("open");
+        document.body.classList.toggle("menu-open");
     });
 });

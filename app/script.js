@@ -41,17 +41,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const newListButton = document.getElementById("new_list");
     const seeListsButton = document.getElementById("open_lists");
-    const n_lists = await get_list_count();
-
-    seeListsButton.textContent = "See lists (" + n_lists + ")"
-
-    newListButton.addEventListener("click", () => {
-        window.location.href = "/app/list/create/";
-    });
-    
-    seeListsButton.addEventListener("click", () => {
-        window.location.href = "/app/list/see/";
-    });
 
     const toggleBtn = document.querySelector('.menu-toggle');
     const menu = document.querySelector('.menu');
@@ -60,6 +49,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         menu.classList.toggle("open");
         document.body.classList.toggle("menu-open");
     });
+
+    newListButton.addEventListener("click", () => {
+        window.location.href = "/app/list/create/";
+    });
+    seeListsButton.addEventListener("click", () => {
+        window.location.href = "/app/list/see/";
+    });
+
+    try {
+        const n_lists = await get_list_count();
+        seeListsButton.textContent = "See lists (" + n_lists + ")";
+    } catch (err) {
+        console.error("Konnte Listenanzahl nicht laden:", err);
+    }
 });
 
 onAuthStateChanged(auth, async (user) => {

@@ -15,7 +15,8 @@ import {
     getAuth,
     createUserWithEmailAndPassword,
     sendEmailVerification,
-    onAuthStateChanged
+    onAuthStateChanged,
+    signOut
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -76,7 +77,10 @@ async function new_account(email, username, password, user_type) {
         window.location.href = "/app/loading/?from=register&action=create&target=/app/account/registration/register/confirmation/";
     } catch (error) {
         console.error(error);
-        if (error.code === "auth/email-already-in-use") { alert("Sie können nur einen Account haben!") }
+        if (error.code === "auth/email-already-in-use") {
+            alert("Sie können nur einen Account haben!")
+            return;
+        }
         alert("Es ist ein unerwarteter Fehler aufgetreten! Bitte melden Sie sich bei den Entwicklern. Error-Info: " + error.message);
     }
 }
@@ -206,4 +210,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
     console.log(window.location.origin);
+
+    const toggleBtn = document.querySelector('.menu-toggle');
+    const menu = document.querySelector('.menu');
+
+    toggleBtn.addEventListener("click", () => {
+        menu.classList.toggle("open");
+        document.body.classList.toggle("menu-open");
+    });
 });

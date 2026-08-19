@@ -2,13 +2,13 @@ import {emailLinks} from '/assets/docs/email-links.js';
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import {
-getAuth,
-onAuthStateChanged
+    getAuth,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 import {
-getFirestore,
-doc,
-updateDoc
+    getFirestore,
+    doc,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -38,42 +38,32 @@ async function forwarding(email) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const forwardButton = document.getElementById("forward");
-    const message = document.getElementById("message");
-    const user = get_user();
-
-    message.innerHTML = "Es wurde eine E-Mail an " + user.email + "geschickt."
-    for (const email_add of emailLinks) {
-        if (user.email.includes(email_add[0])) {
-            forwardButton.classList.toggle("hidden", false);
-        }
-    }
-
-    forwardButton.addEventListener("click", () => {
-        forwarding(user.email.value);
-    });
-});
-
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
         alert("Sie sind noch nicht angemeldet!");
         window.location.href = "/login/";
-    } else {
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const forwardButton = document.getElementById("forward");
-            const message = document.getElementById("message");
-
-            message.innerHTML = "Es wurde eine E-Mail an " + user.email + "geschickt."
-            for (const email_add of emailLinks) {
-                if (user.email.includes(email_add[0])) {
-                    forwardButton.classList.toggle("hidden", false);
-                }
-            }
-            forwardButton.addEventListener("click", () => {
-                forwarding(user.email);
-            });
-        });
+        return;
     }
+    const forwardButton = document.getElementById("forward");
+    const message = document.getElementById("message");
+
+    message.innerHTML = "Es wurde eine E-Mail an " + user.email + " geschickt."
+
+    for (const email_add of emailLinks) {
+        if (user.email.includes(email_add[0])) {
+                forwardButton.classList.toggle("hidden", false);
+        }
+    }
+
+    forwardButton.addEventListener("click", () => {
+        forwarding(user.email);
+    });
+});
+
+const toggleBtn = document.querySelector('.menu-toggle');
+const menu = document.querySelector('.menu');
+
+toggleBtn.addEventListener("click", () => {
+    menu.classList.toggle("open");
+    document.body.classList.toggle("menu-open");
 });

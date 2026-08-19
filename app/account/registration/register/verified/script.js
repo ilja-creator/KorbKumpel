@@ -47,3 +47,11 @@ onAuthStateChanged(auth, async (user) => {
         alert("Probieren Sie den Link erneut zu öffnen oder die Seite neuzuladen. Falls dieses Problem häufiger auftritt und Sie sich nicht mehr anmelden können, melden Sie sich bitte bei den Entwicklern!");
     }
 });
+
+const toggleBtn = document.querySelector('.menu-toggle');
+const menu = document.querySelector('.menu');
+
+toggleBtn.addEventListener("click", () => {
+    menu.classList.toggle("open");
+    document.body.classList.toggle("menu-open");
+});
