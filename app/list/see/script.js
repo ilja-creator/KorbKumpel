@@ -8,7 +8,8 @@ import {
     getDocs
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import {
-    getAuth
+    getAuth,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -80,7 +81,7 @@ async function render_list_buttons() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const selectedListButton = document.getElementById("select_list");
+    const selectListButton = document.getElementById("select_list");
 
     selectListButton.addEventListener("click", () => {
         if (selected !== null) {

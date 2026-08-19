@@ -33,7 +33,12 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+let check = true;
+
 onAuthStateChanged(auth, async (user) => {
+    if (!check) {
+        return;
+    }
     if (!user) {
         return;
     }
@@ -76,6 +81,7 @@ async function new_account(email, username, password, user_type) {
         });
         window.location.href = "/app/loading/?from=register&action=create&target=/app/account/registration/register/confirmation/";
     } catch (error) {
+        check = true;
         console.error(error);
         if (error.code === "auth/email-already-in-use") {
             alert("Sie können nur einen Account haben!")
@@ -190,6 +196,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Die Passwörter stimmen nicht überein!");
         }
         else {
+            check = false;!
             new_account(email, username, pw, type);
         }
     });

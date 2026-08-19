@@ -82,6 +82,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (error.code === "auth/invalid-credential") {
                 alert("Eine Anmeldung mit dieser E-Mail-Passwort-Kombination ist nicht möglich!");
+            } else if (error.code === "auth/invalid-email") {
+                alert("Bittte überprüfen Sie Ihre E-Mail-Adresse!");
+            } else if (error.code === "auth/invalid-password") {
+                alert("Bitte überprüfen Sie Ihr Passwort!");
             } else if (error.code === "auth/too-many-requests") {
                 alert("Zu viele Versuche. Bitte versuchen Sie es später erneut!");
             } else {

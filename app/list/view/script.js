@@ -56,7 +56,7 @@ async function render_list() {
 
     const container = document.getElementById("item_cont");
     container.querySelectorAll("li:not(.list-meta)").forEach((li) => li.remove());
-    sort_list(data.content, sort_mode).forEach((item, index) => {
+    sort_list(data.content.filter((item) => item !== null), sort_mode).forEach((item, index) => {
         if (item === null) return;
 
         const li = document.createElement("li");

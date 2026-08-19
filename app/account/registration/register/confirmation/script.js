@@ -47,7 +47,7 @@ onAuthStateChanged(auth, async (user) => {
     const forwardButton = document.getElementById("forward");
     const message = document.getElementById("message");
 
-    message.innerHTML = "Es wurde eine E-Mail an " + user.email + " geschickt."
+    message.innerHTML = `Es wurde eine E-Mail an <i>${user.email}</i> geschickt.`;
 
     for (const email_add of emailLinks) {
         if (user.email.includes(email_add[0])) {
