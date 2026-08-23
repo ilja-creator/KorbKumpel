@@ -12,13 +12,18 @@
     <a href="/">
         <h1>KorbKumpel</h1>
     </a>
+
+    <button class="menu-toggle" aria-label="Menü öffnen">☰</button>
     <nav class="menu">
         <a class="app" href="/app/">APP*</a>
     </nav>
     <h2>Anmeldung</h2>
 
     <input id="email" placeholder="E-Mail-Adresse" type="text" >
-    <input id="password" placeholder="Passwort" type="password">
+    <div class="password-wrap">
+        <input id="password" placeholder="Passwort" type="password">
+        <button type="button" id="toggle-pw">👁</button>
+    </div>
 
     <button id="login">Anmelden</button>
     <label id="error"></label>

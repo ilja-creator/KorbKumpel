@@ -1,0 +1,18 @@
+{
+  "updates": [
+    {
+      "version": "v1-2-0",
+      "features_list": [
+        "Labels für Artikel",
+        "Fehlerbehebung beim Login",
+        "Neues Menü für Mobiltelefonnutzer",
+        "Überarbeitete/s Animationen und Layout",
+        "Neue Features für Angemeldete: ",
+        "§ E-Mail-Support,",
+        "§ E-Mail-Update-Benachrichtigungen",
+        "§ Überarbeitung des Account-Menüs"
+      ]
+    },
+    {}
+  ]
+}

@@ -1,12 +1,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import {
-getAuth,
-onAuthStateChanged
+    getAuth,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
 import {
-getFirestore,
-doc,
-updateDoc
+    collection,
+    addDoc,
+    getFirestore,
+    doc,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -42,6 +45,15 @@ onAuthStateChanged(auth, async (user) => {
         });
          message.textContent = "Ihre E-Mail-Adresse wurde erfolgreich bestätigt! Vielen Dank!";
          url.classList.toggle("hidden", true);
+
+         try {
+             const docRef = await addDoc(collection(db, "labels", user), {
+                 labels: []
+             });
+         } catch (error) {
+             alert("Ein unerwarteter Fehler ist aufgetreten. Bitte melden Sie sich beim Support mit: ", error);
+         }
+
     } else {
         message.textContent = "Ihre E-Mail-Adresse konnte leider nicht bestätigt werden.";
         alert("Probieren Sie den Link erneut zu öffnen oder die Seite neuzuladen. Falls dieses Problem häufiger auftritt und Sie sich nicht mehr anmelden können, melden Sie sich bitte bei den Entwicklern!");

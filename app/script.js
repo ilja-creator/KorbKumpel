@@ -3,6 +3,7 @@ import {
     getFirestore,
     collection,
     doc,
+    getDoc,
     getDocs,
     updateDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
@@ -26,9 +27,70 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+async function load_updates() {
+    const response = await fetch("/information/updates/update-information.json");
+    return (await response.json()).updates;
+}
+async function get_latest_version(updates) {
+    const validUpdates = updates.filter((u) => u.version && u.features_list);
+
+    validUpdates.sort((a, b) => {
+        const partsA = a.version.replace("v", "").split("-").map(Number);
+        const partsB = b.version.replace("v", "").split("-").map(Number);
+
+        if (partsA[0] !== partsB[0]) return partsB[0] - partsA[0];
+        if (partsA[1] !== partsB[1]) return partsB[1] - partsA[1];
+        return partsB[2] - partsA[2];
+    });
+    return validUpdates[0];
+}
+
 async function get_list_count() {
     const listsSnapshot = await getDocs(collection(db, "lists"));
-    return listsSnapshot.size;
+    const user = auth.currentUser;
+    let n_lists = 0;
+
+    for (const listDoc of listsSnapshot.docs) {
+        if (listDoc.data().createdBy === user.uid) { n_lists++; }
+    }
+    return n_lists;
+}
+
+async function check_user_type() {
+    const user = auth.currentUser;
+    const accountDoc = await getDoc(doc(db, "accounts", user.uid));
+    const accountData = accountDoc.data();
+
+    if (accountData.user_type === "admin") {
+        document.getElementById("send_update_email").classList.remove("hidden");
+    }
+}
+
+function build_html(features) {
+    let html = "<ul>";
+    let subListOpen = false;
+
+    for (const feature of features) {
+        if (feature.trim().startsWith("§")) {
+            if (!subListOpen) {
+                html += "<ul>";
+                subListOpen = true;
+            }
+            const cleanText = feature.trim().slice(1).trim();
+            html += `<li>${cleanText}</li>`;
+        } else {
+            if (subListOpen) {
+                html += "</ul>";
+                subListOpen = false;
+            }
+            html += `<li>${feature}</li>`;
+        }
+    }
+
+    if (subListOpen) {
+        html += "</ul>";
+    } html += "</ul>";
+    return html;
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -63,6 +125,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (err) {
         console.error("Konnte Listenanzahl nicht laden:", err);
     }
+
+    document.getElementById("send_update_email").addEventListener("click", async () => {
+        const update_information = await get_latest_version(load_updates());
+        const confirmed = confirm(`Do you really want to send an update information email (${update_information.version}) to all users?`);
+        if (!confirmed) return;
+
+        const accountsSnapshot = await getDocs(collection(db, "accounts"));
+        const activeAccounts = accountsSnapshot.docs.filter((account) => account.data().wantsUpdates !== false);
+        const bccList = activeAccounts.map((account) => account.data().email).join(",");
+
+        await emailjs.send("service_oyluoai", "template_31w6lau", {
+            update_version: update_information.version,
+            bcc_list: bccList,
+            features_list: build_html(update_information.features_list)
+        });
+        alert("Update emails were sent successfully.")
+    });
 });
 
 onAuthStateChanged(auth, async (user) => {
@@ -74,6 +153,8 @@ onAuthStateChanged(auth, async (user) => {
         window.location.href = "/app/account/registration/";
         return;
     }
+
+    check_user_type();
 
     await user.reload();
 

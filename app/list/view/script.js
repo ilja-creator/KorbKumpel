@@ -5,11 +5,14 @@ import {
     doc,
     getDoc,
     getDocs,
-    addDoc,
     updateDoc,
     deleteDoc,
     arrayUnion
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import {
+    getAuth,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDDVyeXu7qx6ESApel4Ew8CaQyi0tmLiHc",
@@ -22,6 +25,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth();
 
 const params = new URLSearchParams(window.location.search);
 const listId = params.get("id");
@@ -33,12 +37,28 @@ async function render_list_title() {
     const listDocSnap = await getDoc(listDocRef);
 
     if (listDocSnap.exists()) {
-        document.getElementById("name").textContent = listDocSnap.data().listName;
+        document.getElementById("list_title").textContent = listDocSnap.data().name;
     }
     else {
         window.location.href = "/errors/404/";
     }
 }
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        alert("Bitte melden Sie sich zuerst an!");
+        window.location.href = "/app/account/registration/";
+        return;
+    }
+
+    const listDocSnap = await getDoc(listDocRef);
+    const data = listDocSnap.data();
+
+    if (user.uid !== data.createdBy) {
+        alert("Sie haben keine Berechtigung, diese Liste einzusehen!");
+        window.location.href = "/app/list/see/";
+    }
+});
 
 async function render_list() {
     const listDocSnap = await getDoc(listDocRef);
@@ -86,7 +106,7 @@ async function render_list() {
             }
         });
         const span = document.createElement("span");
-        span.textContent = item.name;
+        span.textContent = item.name + " [" + item.label + "] ";
         span.classList.toggle("checked", item.checked);
 
         label.appendChild(checkboxWrap);
@@ -98,14 +118,48 @@ async function render_list() {
         container.appendChild(li);
     });
 }
+async function render_labels_list() {
+    const user_uid = auth.currentUser.uid;
+    const labelsDocSnap = await getDoc(doc(db, "labels", user_uid));
 
-async function add_item(name) {
+    const data = labelsDocSnap.data();
+    const user_labels = data.labels;
+    user_labels.sort((a, b) => a.importance - b.importance);
+
+    let all_labels = [];
+    for (const label in user_labels) {
+        all_labels.push(label.label);
+    }
+}
+
+async function add_item(name, label) {
     const listDocSnap = await getDoc(listDocRef);
     const data = listDocSnap.data();
+    const labelDocSnap = await getDoc(doc(db, "labels", auth.currentUser.uid));
+    const label_data = labelDocSnap.data();
+    const label_user_data = label_data.labels;
+
+    const user_uid = auth.currentUser.uid;
 
     const newContent = data.content.filter((item) => item !== null);
+    const newContent_labels = label_user_data.filter((label) => label !== null);
 
-    newContent.push({name: name, checked: false});
+    for (const article of data.content) {
+        if (article !== null && article.name === name) {
+            alert("Dieser Artikel existiert bereits. Der neue Eintrag wird gelöscht.");
+            return;
+        }
+    }
+
+    if (label.trim() === "" || label === "undefined") { label = null; }
+    if (!newContent_labels.some((l) => l.label === label)) {
+        newContent_labels.push({label: label, importance: newContent_labels.length});
+        await updateDoc(doc(db, "labels", user_uid), {
+            labels: newContent_labels
+        });
+    }
+
+    newContent.push({name: name, label: label, checked: false});
 
     await updateDoc(listDocRef, {
         content: newContent
@@ -139,22 +193,35 @@ async function update_item(list, name) {
 }
 function sort_list(list, mode) {
     /**
-     * modes:   0: nothing
-     *          1: only checked at the end
+     * modes:   1: only checked at the end
      *          2: alphabetical and checked at the end
+     *          3: sorted by labels, alphabetical and checked at the end
      */
-    if (mode === 1 || mode === 2) {
-        const checked = list.filter((item) => item.checked)
-        const unchecked = list.filter((item) => !item.checked);
+    const checked = list.filter((item) => item.checked)
+    const unchecked = list.filter((item) => !item.checked);
 
-        if (mode === 2) {
-            unchecked.sort((a, b) => a.name.localeCompare(b.name));
-            checked.sort((a, b) => a.name.localeCompare(b.name));
-        }
+    if (mode === 2 || mode === 3) {
+        unchecked.sort((a, b) => a.name.localeCompare(b.name));
+        checked.sort((a, b) => a.name.localeCompare(b.name));
 
-        return [...unchecked, ...checked];
-    }
-    return list;
+        if (mode === 3) {
+            let sorted_label = [];
+            let labels = list
+                .filter((item) => item !== null && item.label !== null && item.label !== "")
+                .map((item) => item.label);
+
+            labels = [...new Set(labels)];
+            labels.sort((a, b) => a.localeCompare(b));
+
+            for (const label of labels) {
+                for (const item of unchecked) {
+                    if (item.label && item.label.trim().toLowerCase() === label.trim().toLowerCase()) {
+                        sorted_label.push(item);
+                    }
+                }
+            } return [...sorted_label, ...checked];
+        } return [...unchecked, ...checked];
+    } return list;
 }
 
 function get_category_label(category) {
@@ -175,40 +242,59 @@ function get_category_label(category) {
 let edit_mode = false;
 document.addEventListener("DOMContentLoaded", () => {
     const editButton = document.getElementById("edit_btn");
+    const editMenu = document.getElementById("edit_menu");
     const addItemButton = document.getElementById("add_btn");
-    const sortButton = document.getElementById("sort_btn");
+    const sort = document.getElementById("sort_select");
     const addItemInput = document.getElementById("add_inp");
+    const labelInput = document.getElementById("label_inp");
     const addItemForm = document.getElementById("added_item_form");
+    const labelMenu = document.getElementById("label-menu");
     render_list();
 
     editButton.addEventListener("click", () => {
         edit_mode = !edit_mode;
         editButton.classList.toggle("selected");
+        editMenu.classList.toggle("visible");
         addItemButton.classList.toggle("hidden");
-        sortButton.classList.toggle("hidden");
-        addItemInput.classList.add("hidden");
+        sort.classList.toggle("hidden");
+        document.querySelector(".new_article").classList.add("hidden");
         addItemButton.classList.remove("selected");
+        labelMenu.classList.toggle("hidden", true);
         document.querySelectorAll(".delete-btn").forEach((item) => {
             item.classList.toggle("hidden", !edit_mode);
         });
     });
     addItemButton.addEventListener("click", () => {
         addItemButton.classList.toggle("selected");
-        addItemInput.classList.toggle("hidden");
+        document.querySelector(".new_article").classList.toggle("hidden");
     });
-    sortButton.addEventListener("click", () => {
-        sort_mode = sort_mode === 1 ? 2 : 1;
+    sort.addEventListener("change", () => {
+        const selected = Number(sort.value);
+        sort_mode = selected;
         render_list();
-        sortButton.classList.toggle("selected");
+        if (sort_mode === 3) {
+            labelMenu.classList.remove("hidden");
+        } else { labelMenu.classList.toggle("hidden", true); }
+        if (![0, 1].includes(selected)) {
+            sort.classList.toggle("selected", true);
+        } else { sort.classList.toggle("selected", false); }
     });
 
     addItemForm.addEventListener("submit", (event) => {
         event.preventDefault();
         const name = addItemInput.value.trim();
+        const label = labelInput.value.trim();
 
         if (name !== "") {
-            add_item(name);
+            add_item(name, label);
             addItemInput.value = "";
+            labelInput.value = "";
+        }
+    });
+    new Sortable(labelMenu, {
+        animation: 150,
+        onEnd: () => {
+            const newOrder = [...labelMenu.children].map((li) => li.textContent);
         }
     });
 
@@ -220,3 +306,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.toggle("menu-open");
     });
 });
+
+const h1 = document.querySelector("h1");
+const editMenu = document.querySelector(".edit-menu");
+const h1Width = h1.getBoundingClientRect().width;
+editMenu.style.minWidth = h1Width + "px";

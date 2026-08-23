@@ -56,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const loginButton = document.getElementById("login");
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
+    const toggleButton = document.getElementById("toggle-pw");
 
     loginButton.addEventListener("click", async() => {
         check = false;
@@ -92,5 +93,34 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert("Login fehlgeschlagen! Wenn dieser Fehler häufiger auftreten sollte, melden Sie sich bitte bei den Entwicklern. Error-Code: " + error.message);
             }
         }
-    })
+    });
+
+    toggleButton.addEventListener("mousedown", () => {
+        passwordInput.type = "text";
+        toggleButton.textContent = "";
+    });
+    toggleButton.addEventListener("mouseup", () => {
+        passwordInput.type = "password";
+        toggleButton.textContent = "👁";
+    });
+    toggleButton.addEventListener("mouseleave", () => {
+        passwordInput.type = "password";
+        toggleButton.textContent = "👁";
+    });
+    toggleButton.addEventListener("touchstart", () => {
+        passwordInput.type = "text";
+        toggleButton.textContent = "";
+    });
+    toggleButton.addEventListener("touchend", () => {
+        passwordInput.type = "password";
+        toggleButton.textContent = "👁";
+    });
+
+    const toggleBtn = document.querySelector('.menu-toggle');
+    const menu = document.querySelector('.menu');
+
+    toggleBtn.addEventListener("click", () => {
+        menu.classList.toggle("open");
+        document.body.classList.toggle("menu-open");
+    });
 });

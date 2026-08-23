@@ -51,7 +51,7 @@ onAuthStateChanged(auth, async (user) => {
 
     for (const email_add of emailLinks) {
         if (user.email.includes(email_add[0])) {
-                forwardButton.classList.toggle("hidden", false);
+            forwardButton.classList.toggle("hidden", false);
         }
     }
 
