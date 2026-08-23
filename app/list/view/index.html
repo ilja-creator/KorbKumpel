@@ -44,13 +44,21 @@
             </div>
             <button type="submit" class="hidden"></button>
 
-        </form>
-        <div class="custom-dropdwon">
-            <button id="label-toggle" type="button">Labels ▾</button>
-            <ul id="label-menu" class="hidden">
-            </ul>
-        </div>
 
+            <div id="select-like" class="select-like hidden">
+                <button id="toggle-menu-button" class="select-button">Reihenfolge bearbeiten ▼ </button>
+
+                <div class="dropdown" id="dropdown">
+                    <div class="item">
+                        <span>Labels konnten nicht geladen werden ...</span>
+                        <div class="controls">
+                            <button onclick="moveUp(this)">⬆️</button>
+                            <button onclick="moveDown(this)">⬇️</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 
     <script type="module" src="script.js"></script>

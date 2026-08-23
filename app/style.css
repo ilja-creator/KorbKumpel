@@ -262,6 +262,7 @@ button:active {
     justify-content: center;
     justify-content: center;
     gap: 1rem;
+    font-size: 1rem;
 }
 .button-row button,
 .button-row select {
@@ -427,17 +428,12 @@ button:active {
     justify-content: center;
     margin: 1.25rem auto;
     margin-top: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
     max-width: fit-content;
 }
 
 .new_article input {
     margin: 0;
-}
-
-#label-menu {
-    margin-top: -1rem;
-    margin-bottom: 0;
 }
 
 .edit-menu {
@@ -449,6 +445,9 @@ button:active {
     border-radius: 0.6rem;
     width: fit-content;
     min-width: 10rem;
+
+    box-sizing: content-box;
+    height: auto;
 
     opacity: 0;
     transform: translateY(20px);
@@ -469,4 +468,69 @@ button:active {
     color: white;
     font-style: italic;
     font-weight: normal;
+}
+
+.select-like {
+    width: 100%;
+    position: relative;
+    margin-top: 1rem;
+}
+.select-button {
+    display: block;
+    margin: 0 auto;
+    padding: 0.8rem 2rem;
+
+    background: linear-gradient(125deg, #2ecc71, #27ae60);
+    color: rgba(0, 0, 0);
+
+    font-size: 1rem;
+    font-weight: normal;
+    text-align: center;
+
+    border: none;
+    border-radius: 0.6rem;
+
+    cursor: pointer;
+}
+.dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+
+    background: #222;
+    border-radius: 0.6rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    padding: 5px;
+
+    z-index: 1003;
+}
+.dropdown.open {
+    display: block;
+}
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-radius: 4px;
+    color: #fff;
+}
+.controls button {
+    display: inline-block;
+    margin: 0 0 0 4px;
+    padding: 0.3rem 0.6rem;
+
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: rgba(0, 0, 0);
+
+    font-size: 1rem;
+    font-weight: normal;
+
+    border: none;
+    border-radius: 0.4rem;
+
+    cursor: pointer;
 }

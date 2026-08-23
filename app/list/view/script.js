@@ -33,17 +33,6 @@ const listId = params.get("id");
 const listDocRef = doc(db, "lists", listId);
 let sort_mode = 1;
 
-async function render_list_title() {
-    const listDocSnap = await getDoc(listDocRef);
-
-    if (listDocSnap.exists()) {
-        document.getElementById("list_title").textContent = listDocSnap.data().name;
-    }
-    else {
-        window.location.href = "/errors/404/";
-    }
-}
-
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
         alert("Bitte melden Sie sich zuerst an!");
@@ -64,6 +53,14 @@ async function render_list() {
     const listDocSnap = await getDoc(listDocRef);
     const data = listDocSnap.data();
 
+    const labelsDocSnap = await getDoc(doc(db, "labels", auth.currentUser.uid));
+    const labelData = labelsDocSnap.data().labels;
+
+    const importanceMap = {};
+    labelData.forEach(label => {
+        importanceMap[label.label] = label.importance;
+    })
+
     const h2 = document.getElementById("list_title");
     h2.textContent = data.name;
 
@@ -76,7 +73,7 @@ async function render_list() {
 
     const container = document.getElementById("item_cont");
     container.querySelectorAll("li:not(.list-meta)").forEach((li) => li.remove());
-    sort_list(data.content.filter((item) => item !== null), sort_mode).forEach((item, index) => {
+    sort_list(data.content.filter((item) => item !== null), sort_mode, importanceMap).forEach((item, index) => {
         if (item === null) return;
 
         const li = document.createElement("li");
@@ -121,14 +118,42 @@ async function render_list() {
 async function render_labels_list() {
     const user_uid = auth.currentUser.uid;
     const labelsDocSnap = await getDoc(doc(db, "labels", user_uid));
+    const dropdown = document.getElementById("dropdown");
 
     const data = labelsDocSnap.data();
     const user_labels = data.labels;
     user_labels.sort((a, b) => a.importance - b.importance);
 
-    let all_labels = [];
-    for (const label in user_labels) {
-        all_labels.push(label.label);
+    dropdown.innerHTML = "";
+
+    for (const label of user_labels) {
+        const span = document.createElement("span");
+        span.textContent = label.label;
+
+        const div = document.createElement("div");
+        const div_item = document.createElement("div");
+        div_item.classList.add("item");
+
+        const buttonUp = document.createElement("button");
+        buttonUp.textContent = "⬆️";
+        buttonUp.type = "button";
+        buttonUp.addEventListener("click", () => moveUp(buttonUp));
+
+        const buttonDown = document.createElement("button");
+        buttonDown.textContent = "⬇️";
+        buttonDown.type = "button";
+        buttonDown.addEventListener("click", () => moveDown(buttonDown));
+        div_item.appendChild(span);
+
+        const controls = document.createElement("div");
+        controls.classList.add("controls");
+
+        controls.appendChild(buttonUp);
+        controls.appendChild(buttonDown);
+
+        div_item.appendChild(controls);
+
+        dropdown.appendChild(div_item);
     }
 }
 
@@ -191,7 +216,7 @@ async function update_item(list, name) {
     });
     await render_list();
 }
-function sort_list(list, mode) {
+function sort_list(list, mode, importanceMap = {}) {
     /**
      * modes:   1: only checked at the end
      *          2: alphabetical and checked at the end
@@ -205,21 +230,10 @@ function sort_list(list, mode) {
         checked.sort((a, b) => a.name.localeCompare(b.name));
 
         if (mode === 3) {
-            let sorted_label = [];
-            let labels = list
-                .filter((item) => item !== null && item.label !== null && item.label !== "")
-                .map((item) => item.label);
-
-            labels = [...new Set(labels)];
-            labels.sort((a, b) => a.localeCompare(b));
-
-            for (const label of labels) {
-                for (const item of unchecked) {
-                    if (item.label && item.label.trim().toLowerCase() === label.trim().toLowerCase()) {
-                        sorted_label.push(item);
-                    }
-                }
-            } return [...sorted_label, ...checked];
+            unchecked.sort((a, b) => {
+                return (importanceMap[a.label] ?? 999) -
+                    (importanceMap[b.label] ?? 999);
+            });
         } return [...unchecked, ...checked];
     } return list;
 }
@@ -259,7 +273,6 @@ document.addEventListener("DOMContentLoaded", () => {
         sort.classList.toggle("hidden");
         document.querySelector(".new_article").classList.add("hidden");
         addItemButton.classList.remove("selected");
-        labelMenu.classList.toggle("hidden", true);
         document.querySelectorAll(".delete-btn").forEach((item) => {
             item.classList.toggle("hidden", !edit_mode);
         });
@@ -269,12 +282,16 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelector(".new_article").classList.toggle("hidden");
     });
     sort.addEventListener("change", () => {
+        const labelMenu = document.getElementById("select-like");
         const selected = Number(sort.value);
         sort_mode = selected;
         render_list();
         if (sort_mode === 3) {
             labelMenu.classList.remove("hidden");
-        } else { labelMenu.classList.toggle("hidden", true); }
+            render_labels_list();
+        } else {
+            labelMenu.classList.toggle("hidden", true);
+        }
         if (![0, 1].includes(selected)) {
             sort.classList.toggle("selected", true);
         } else { sort.classList.toggle("selected", false); }
@@ -291,12 +308,48 @@ document.addEventListener("DOMContentLoaded", () => {
             labelInput.value = "";
         }
     });
-    new Sortable(labelMenu, {
-        animation: 150,
-        onEnd: () => {
-            const newOrder = [...labelMenu.children].map((li) => li.textContent);
-        }
+
+    const toggleMenuButton = document.getElementById("toggle-menu-button");
+    const dropdown = document.getElementById("dropdown");
+
+    toggleMenuButton.addEventListener("click", () => {
+        dropdown.classList.toggle("open");
     });
+
+    window.moveUp = function moveUp(btn) {
+        const item = btn.closest(".item");
+        const prev = item.previousElementSibling;
+
+        if (prev) {
+            item.parentNode.insertBefore(item, prev);
+            updateLabelsSequence();
+        }
+    }
+    window.moveDown = function moveDown(btn) {
+        const item = btn.closest(".item");
+        const next = item.nextElementSibling;
+
+        if (next) {
+            item.parentNode.insertBefore(item, next.nextElementSibling);
+            updateLabelsSequence();
+        }
+    }
+
+    async function updateLabelsSequence() {
+        const dropdown = document.getElementById("dropdown");
+        const items = [...dropdown.children];
+        const newOrder = items.map((item, index) => ({
+            label: item.querySelector("span").textContent,
+            importance: index
+        }));
+
+        const user_uid = auth.currentUser.uid;
+        await updateDoc(doc(db, "labels", user_uid), {
+            labels: newOrder
+        });
+        render_labels_list();
+        render_list();
+    }
 
     const toggleBtn = document.querySelector('.menu-toggle');
     const menu = document.querySelector('.menu');
