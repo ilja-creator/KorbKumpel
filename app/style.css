@@ -350,7 +350,7 @@ button:active {
         display: block;
         position: fixed;
         top: 5.2rem;
-        left: 4.5rem;
+        left: auto;
         font-size: 1.5rem;
         background: none;
         border: none;
@@ -443,8 +443,10 @@ button:active {
     padding: 0.5rem;
     margin: auto;
     border-radius: 0.6rem;
+
     width: fit-content;
-    min-width: 10rem;
+    max-width: calc(100vw - 1rem);
+    min-width: 5rem;
 
     box-sizing: content-box;
     height: auto;
@@ -463,11 +465,15 @@ button:active {
 }
 
 .admin {
-    margin-top: 5rem;
     background: indianred;
     color: white;
     font-style: italic;
     font-weight: normal;
+}
+.admin hr {
+    border: 5px solid indianred !important;
+    background: none !important;
+    height: 0;
 }
 
 .select-like {

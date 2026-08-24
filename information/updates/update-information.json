@@ -13,6 +13,15 @@
         "§ Überarbeitung des Account-Menüs"
       ]
     },
-    {}
+    {
+      "version": "v2-0-0",
+      "features_list": [
+        "2. Voll-Version",
+        "Überarbeitetes Layout",
+        "Fehlerbehebungen",
+        "E-Mail-Support /-Informationen",
+        "Account-menü"
+      ]
+    }
   ]
 }

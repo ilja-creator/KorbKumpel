@@ -36,12 +36,21 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("save_list wurde aufgerufen");
         const listsSnapshot = await getDocs(collection(db, "lists"));
         let maxId = 0;
+        let nameExists = false;
         listsSnapshot.forEach((docSnap) => {
             const data = docSnap.data();
             if (data.listNumber > maxId) {
                 maxId = data.listNumber;
+            } if (data.name.trim().toLowerCase() === name_list.value.trim().toLowerCase()) {
+                nameExists = true;
             }
         });
+
+        if (nameExists) {
+            alert("Sie haben schon eine Liste mit diesem Namen!");
+            return;
+        }
+
         const nextId = maxId + 1;
         const listName = name_list.value.trim()
 
@@ -49,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Geben Sie einen Namen für die Liste ein!")
             return;
         } if (!acceptance.checked) {
-            alert("Stimmen Sie zuerst zu, um eine neue Liste zu erstellen!")
+            alert("Stimmen Sie zuerst den AGB zu, um eine neue Liste zu erstellen!")
             return;
         }
 

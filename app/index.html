@@ -24,8 +24,17 @@
     <h2>Startseite</h2>
     <button id="new_list" class="selected">Create new list!</button>
     <button id="open_lists" class="selected">See lists (x)</button>
-    
-    <button id="send_update_email" type="button" class="hidden admin">Send Update-Information to users</button>
+
+    <div class="hidden" id="admin-menu">
+        <br><br><br>
+        <hr class="admin">
+        <select id="email">
+            <option value="update-mail">Update-E-Mail</option>
+            <option value="welcome">Welcome-E-Mail</option>
+            <option value="write">Andere</option>
+        </select>
+        <button id="send_email" type="button" class="admin">Send selected E-Mail</button>
+    </div>
 
     <script type="module" src="script.js"></script>
 </body>

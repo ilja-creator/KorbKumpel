@@ -11,6 +11,11 @@ import {
     doc,
     updateDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/+esm';
+
+emailjs.init({
+    publicKey: "qQjyms3EOPdybsHRJ"
+});
 
 const firebaseConfig = {
     apiKey: "AIzaSyDDVyeXu7qx6ESApel4Ew8CaQyi0tmLiHc",
@@ -51,9 +56,12 @@ onAuthStateChanged(auth, async (user) => {
                  labels: []
              });
          } catch (error) {
-             alert("Ein unerwarteter Fehler ist aufgetreten. Bitte melden Sie sich beim Support mit: ", error);
+             alert("Ein unerwarteter Fehler ist aufgetreten. Bitte melden Sie sich beim Support mit: LABELS-COLLECTION – ", error);
          }
-
+         await emailjs.send("service-oyluoai", "template_elanm6q", {
+             email: user.email,
+             name: user.username
+         });
     } else {
         message.textContent = "Ihre E-Mail-Adresse konnte leider nicht bestätigt werden.";
         alert("Probieren Sie den Link erneut zu öffnen oder die Seite neuzuladen. Falls dieses Problem häufiger auftritt und Sie sich nicht mehr anmelden können, melden Sie sich bitte bei den Entwicklern!");

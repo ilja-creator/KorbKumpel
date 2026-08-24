@@ -12,6 +12,11 @@ import {
     onAuthStateChanged,
     signOut
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/+esm';
+
+emailjs.init({
+    publicKey: "qQjyms3EOPdybsHRJ"
+});
 
 const firebaseConfig = {
     apiKey: "AIzaSyDDVyeXu7qx6ESApel4Ew8CaQyi0tmLiHc",
@@ -31,6 +36,7 @@ async function load_updates() {
     const response = await fetch("/information/updates/update-information.json");
     return (await response.json()).updates;
 }
+
 async function get_latest_version(updates) {
     const validUpdates = updates.filter((u) => u.version && u.features_list);
 
@@ -62,7 +68,7 @@ async function check_user_type() {
     const accountData = accountDoc.data();
 
     if (accountData.user_type === "admin") {
-        document.getElementById("send_update_email").classList.remove("hidden");
+        document.getElementById("admin-menu").classList.remove("hidden");
     }
 }
 
@@ -126,21 +132,50 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("Konnte Listenanzahl nicht laden:", err);
     }
 
-    document.getElementById("send_update_email").addEventListener("click", async () => {
-        const update_information = await get_latest_version(load_updates());
-        const confirmed = confirm(`Do you really want to send an update information email (${update_information.version}) to all users?`);
-        if (!confirmed) return;
+    document.getElementById("send_email").addEventListener("click", async () => {
+        const emailSelect = document.getElementById("email");
 
-        const accountsSnapshot = await getDocs(collection(db, "accounts"));
-        const activeAccounts = accountsSnapshot.docs.filter((account) => account.data().wantsUpdates !== false);
-        const bccList = activeAccounts.map((account) => account.data().email).join(",");
+        if (emailSelect.value === "update-mail") {
+            const update_information = await get_latest_version(await load_updates());
+            const confirmed = confirm(`Do you really want to send an update information email (${update_information.version}) to all users?`);
+            if (!confirmed) return;
 
-        await emailjs.send("service_oyluoai", "template_31w6lau", {
-            update_version: update_information.version,
-            bcc_list: bccList,
-            features_list: build_html(update_information.features_list)
-        });
-        alert("Update emails were sent successfully.")
+            const accountsSnapshot = await getDocs(collection(db, "accounts"));
+            const activeAccounts = accountsSnapshot.docs.filter((account) => account.data().wantsUpdates !== false);
+            const bccList = activeAccounts.map((account) => account.data().email).join(",");
+
+            await emailjs.send("service_oyluoai", "template_31w6lau", {
+                update_version: update_information.version,
+                bcc_list: bccList,
+                features_list: build_html(update_information.features_list)
+            });
+            alert("Update emails were sent successfully.")
+        } else if (emailSelect.value === "welcome") {
+            const email = prompt("Please enter your email: ");
+            const confirmed = confirm(`Do You really want to send an welcome information to ${email}?`);
+            if (!confirmed) return;
+
+            let name = null;
+
+            const accountsSnapshot = await getDocs(collection(db, "accounts"));
+            for (const accountDoc of accountsSnapshot.docs) {
+                const account = accountDoc.data();
+
+                if (account.email === email) {
+                    name = account.username;
+                    break;
+                }
+            }
+            if (!name) {
+                alert("ERROR");
+                return;
+            }
+            await emailjs.send("service_oyluoai", "template_elanm6q", {
+                email: email,
+                name: name
+            });
+            alert(`Email sent to ${email} at ${name}.`)
+        }
     });
 });
 

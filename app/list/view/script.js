@@ -47,6 +47,8 @@ onAuthStateChanged(auth, async (user) => {
         alert("Sie haben keine Berechtigung, diese Liste einzusehen!");
         window.location.href = "/app/list/see/";
     }
+
+    render_list();
 });
 
 async function render_list() {
@@ -252,7 +254,6 @@ function get_category_label(category) {
     return label;
 }
 
-
 let edit_mode = false;
 document.addEventListener("DOMContentLoaded", () => {
     const editButton = document.getElementById("edit_btn");
@@ -360,7 +361,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-const h1 = document.querySelector("h1");
-const editMenu = document.querySelector(".edit-menu");
-const h1Width = h1.getBoundingClientRect().width;
-editMenu.style.minWidth = h1Width + "px";
