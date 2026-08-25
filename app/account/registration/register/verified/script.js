@@ -6,7 +6,7 @@ import {
 
 import {
     collection,
-    addDoc,
+    setDoc,
     getFirestore,
     doc,
     updateDoc
@@ -52,11 +52,11 @@ onAuthStateChanged(auth, async (user) => {
          url.classList.toggle("hidden", true);
 
          try {
-             const docRef = await addDoc(collection(db, "labels", user), {
+             const docRef = await setDoc(doc(db, "labels", user.uid), {
                  labels: []
              });
          } catch (error) {
-             alert("Ein unerwarteter Fehler ist aufgetreten. Bitte melden Sie sich beim Support mit: LABELS-COLLECTION – ", error);
+             alert("Ein unerwarteter Fehler ist aufgetreten. Bitte melden Sie sich beim Support mit: LABELS-COLLECTION – ", error.text);
          }
          await emailjs.send("service-oyluoai", "template_elanm6q", {
              email: user.email,
