@@ -69,7 +69,8 @@ document.addEventListener("DOMContentLoaded", () => {
             content: [null],
             listNumber: nextId,
             name: listName,
-            createdBy: auth.currentUser.uid
+            createdBy: auth.currentUser.uid,
+            sort_mode: 1
         });
 
         window.location.href = `/app/loading/?from=list&action=create&target=/app/list/view?id=${docRef.id}`;

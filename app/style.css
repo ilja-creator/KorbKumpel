@@ -429,11 +429,17 @@ button:active {
     margin: 1.25rem auto;
     margin-top: 1rem;
     margin-bottom: 0;
-    max-width: fit-content;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .new_article input {
+    display: inline-block;
     margin: 0;
+    min-width: 7rem;
+    flex: 0 1 auto;
+    max-width: 9rem;
 }
 
 .edit-menu {

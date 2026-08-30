@@ -177,6 +177,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert(`Email sent to ${email} at ${name}.`)
         }
     });
+    document.getElementById("to-support").addEventListener("click", () => {
+        window.location.href = "support/";
+    });
 });
 
 onAuthStateChanged(auth, async (user) => {

@@ -75,6 +75,9 @@ async function render_list() {
 
     const container = document.getElementById("item_cont");
     container.querySelectorAll("li:not(.list-meta)").forEach((li) => li.remove());
+
+    let sort_mode = data.sort_mode;
+
     sort_list(data.content.filter((item) => item !== null), sort_mode, importanceMap).forEach((item, index) => {
         if (item === null) return;
 
@@ -116,6 +119,8 @@ async function render_list() {
 
         container.appendChild(li);
     });
+    const select = document.getElementById("sort_select");
+    select.value = sort_mode ?? 1;
 }
 async function render_labels_list() {
     const user_uid = auth.currentUser.uid;
@@ -218,6 +223,7 @@ async function update_item(list, name) {
     });
     await render_list();
 }
+
 function sort_list(list, mode, importanceMap = {}) {
     /**
      * modes:   1: only checked at the end
@@ -282,11 +288,16 @@ document.addEventListener("DOMContentLoaded", () => {
         addItemButton.classList.toggle("selected");
         document.querySelector(".new_article").classList.toggle("hidden");
     });
-    sort.addEventListener("change", () => {
+    sort.addEventListener("change", async() => {
         const labelMenu = document.getElementById("select-like");
         const selected = Number(sort.value);
         sort_mode = selected;
-        render_list();
+
+        await updateDoc(listDocRef, {
+            sort_mode: sort_mode
+        });
+        await render_list();
+
         if (sort_mode === 3) {
             labelMenu.classList.remove("hidden");
             render_labels_list();
@@ -298,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else { sort.classList.toggle("selected", false); }
     });
 
-    addItemForm.addEventListener("submit", (event) => {
+    addItemForm.addEventListener("submit", async(event) => {
         event.preventDefault();
         const name = addItemInput.value.trim();
         const label = labelInput.value.trim();
@@ -306,8 +317,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (name !== "") {
             add_item(name, label);
             addItemInput.value = "";
-            labelInput.value = "";
         }
+
+        await render_list();
+        await updateLabelsSequence();
     });
 
     const toggleMenuButton = document.getElementById("toggle-menu-button");

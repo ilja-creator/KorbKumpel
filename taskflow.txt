@@ -1,0 +1,4 @@
+tfk_live_OUWaND8BnpYwK0-ETuOltLK4Px7eM4Zr
+claude mcp add taskfolk-product \
+  https://taskfolk.ai/api/mcp/v1 \
+  --header "Authorization: Bearer tfk_live_OUWaND8BnpYwK0-ETuOltLK4Px7eM4Zr"
