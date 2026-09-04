@@ -5,7 +5,8 @@ import {
     doc,
     setDoc,
     getDoc,
-    getDocs
+    getDocs,
+    deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import {
     getAuth,
@@ -57,9 +58,25 @@ async function render_list_buttons() {
             const count = await get_content_count(docSnap.id);
             const category = get_category_label(data.category);
 
+            const button_group = document.createElement("div");
+
             const button = document.createElement("button");
             button.textContent = data.name + "(" + count + ")" + " [" + category + "]";
             button.dataset.id = docSnap.id;
+
+            const dlt_button = document.createElement("button");
+            dlt_button.textContent = "🗑";
+
+            dlt_button.addEventListener("click", async () => {
+                if (confirm(`Wollen Sie die Liste ${data.name} wirklich irreversibel löschen?`)) {
+                    await deleteDoc(doc(db, "lists", docSnap.id));
+                    button_group.remove();
+                }
+            });
+
+            button_group.appendChild(button);
+            button_group.appendChild(dlt_button);
+            button_group.classList.add("button-row", "button-group");
 
             button.addEventListener("click", () => {
                 if (button.classList.contains("selected")) {
@@ -75,7 +92,7 @@ async function render_list_buttons() {
                     selectedButton = button;
                 }
             });
-            container.appendChild(button);
+            container.appendChild(button_group);
         }
     }
 }

@@ -201,6 +201,10 @@ button:active {
     box-shadow: 0 0 6px rgba(46, 204, 113, 0.4);
 }
 
+.button-group {
+    padding: 0.5rem 0 1rem 0 !important;
+}
+
 .center {
     text-align: center;
 }

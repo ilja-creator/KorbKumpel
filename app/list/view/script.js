@@ -48,15 +48,15 @@ onAuthStateChanged(auth, async (user) => {
         window.location.href = "/app/list/see/";
     }
 
-    render_list();
+    render_list(user.uid);
 });
 
-async function render_list() {
+async function render_list(uid) {
     const listDocSnap = await getDoc(listDocRef);
     const data = listDocSnap.data();
 
-    const labelsDocSnap = await getDoc(doc(db, "labels", auth.currentUser.uid));
-    const labelData = labelsDocSnap.data().labels;
+    const labelsDocSnap = await getDoc(doc(db, "labels", uid));
+    const labelData = labelsDocSnap.data()?.labels || [];
 
     const importanceMap = {};
     labelData.forEach(label => {
@@ -69,7 +69,7 @@ async function render_list() {
     const itemCount = document.getElementById("item_count");
     const listCategory = document.getElementById("list_category");
 
-    const count = data.content.filter((item) => item !== null).length;
+    const count = data.content.filter((item) => item !== null && !item.checked).length;
     itemCount.textContent = count;
     listCategory.textContent = get_category_label(data.category);
 
@@ -121,14 +121,21 @@ async function render_list() {
     });
     const select = document.getElementById("sort_select");
     select.value = sort_mode ?? 1;
+
+    const labelMenu = document.getElementById("select-like");
+    if (sort_mode === 3) {
+        labelMenu.classList.remove("hidden");
+        render_labels_list(uid);
+    } else {
+        labelMenu.classList.add("hidden");
+    }
 }
-async function render_labels_list() {
-    const user_uid = auth.currentUser.uid;
-    const labelsDocSnap = await getDoc(doc(db, "labels", user_uid));
+async function render_labels_list(uid) {
+    const labelsDocSnap = await getDoc(doc(db, "labels", uid));
     const dropdown = document.getElementById("dropdown");
 
-    const data = labelsDocSnap.data();
-    const user_labels = data.labels;
+    const data = labelsDocSnap.data() || {};
+    const user_labels = data.labels || [];
     user_labels.sort((a, b) => a.importance - b.importance);
 
     dropdown.innerHTML = "";
@@ -196,7 +203,7 @@ async function add_item(name, label) {
     await updateDoc(listDocRef, {
         content: newContent
     });
-    await render_list();
+    await render_list(user_uid);
 }
 async function delete_item(name) {
     const listDocSnap = await getDoc(listDocRef);
@@ -208,7 +215,7 @@ async function delete_item(name) {
     await updateDoc(listDocRef, {
         content: newContent
     });
-    await render_list();
+    await render_list(auth.currentUser.uid);
 }
 async function update_item(list, name) {
     const new_content = list.map((element) => {
@@ -221,7 +228,7 @@ async function update_item(list, name) {
     await updateDoc(listDocRef, {
         content: new_content
     });
-    await render_list();
+    await render_list(auth.currentUser.uid);
 }
 
 function sort_list(list, mode, importanceMap = {}) {
@@ -229,6 +236,7 @@ function sort_list(list, mode, importanceMap = {}) {
      * modes:   1: only checked at the end
      *          2: alphabetical and checked at the end
      *          3: sorted by labels, alphabetical and checked at the end
+     *          4: sort labels alphabetical and checked at the end
      */
     const checked = list.filter((item) => item.checked)
     const unchecked = list.filter((item) => !item.checked);
@@ -244,6 +252,23 @@ function sort_list(list, mode, importanceMap = {}) {
             });
         } return [...unchecked, ...checked];
     } return list;
+}
+
+async function sort_labels(uid) {
+    const labelsDocSnap = await getDoc(doc(db, "labels", uid));
+    const data = labelsDocSnap.data() || {};
+    const user_labels = (data.labels || []).filter((label) => label !== null);
+
+    user_labels.sort((a, b) => a.label.localeCompare(b.label));
+
+    const newOrder = user_labels.map((label, index) => ({
+        ...label,
+        importance: index
+    }));
+
+    await updateDoc(doc(db, "labels", uid), {
+        labels: newOrder
+    });
 }
 
 function get_category_label(category) {
@@ -270,7 +295,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const labelInput = document.getElementById("label_inp");
     const addItemForm = document.getElementById("added_item_form");
     const labelMenu = document.getElementById("label-menu");
-    render_list();
 
     editButton.addEventListener("click", () => {
         edit_mode = !edit_mode;
@@ -293,14 +317,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const selected = Number(sort.value);
         sort_mode = selected;
 
+        if (sort_mode === 4) {
+            await sort_labels(auth.currentUser.uid);
+            sort_mode = 3;
+            sort.value = 3;
+        }
+
         await updateDoc(listDocRef, {
             sort_mode: sort_mode
         });
-        await render_list();
+        await render_list(auth.currentUser.uid);
 
         if (sort_mode === 3) {
             labelMenu.classList.remove("hidden");
-            render_labels_list();
+            render_labels_list(auth.currentUser.uid);
         } else {
             labelMenu.classList.toggle("hidden", true);
         }
@@ -315,11 +345,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const label = labelInput.value.trim();
 
         if (name !== "") {
-            add_item(name, label);
+            await add_item(name, label);
             addItemInput.value = "";
         }
 
-        await render_list();
+        await render_list(auth.currentUser.uid);
         await updateLabelsSequence();
     });
 
@@ -361,8 +391,8 @@ document.addEventListener("DOMContentLoaded", () => {
         await updateDoc(doc(db, "labels", user_uid), {
             labels: newOrder
         });
-        render_labels_list();
-        render_list();
+        render_labels_list(auth.currentUser.uid);
+        render_list(auth.currentUser.uid);
     }
 
     const toggleBtn = document.querySelector('.menu-toggle');
