@@ -30,6 +30,17 @@
         "Support-Portal",
         "Fehlerbehebung beim einsehen von Listen"
       ]
+    },
+    {
+      "version": "v2-2-0",
+      "features_list": [
+        "Listen löschen",
+        "Neue Sortier-Funktion:",
+        "§ Labels alphabetisch sortieren",
+        "Fehlerbehebung beim Laden der Labels auf Apple-Geräten",
+        "Nur offene Artikel als Anzahl beim Einsehen von Listen",
+        "Benutzerfreundlicheres Bearbeiten von Listen"
+      ]
     }
   ]
 }

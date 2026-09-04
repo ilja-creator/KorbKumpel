@@ -102,10 +102,7 @@ async function render_list(uid) {
         button.classList.toggle("hidden", !edit_mode);
         button.id = "button-" + index;
         button.addEventListener("click", () => {
-            const ask = confirm(`Sind Sie sich sicher, dass Sie ${item.name} irreversibel löschen?`);
-            if (ask) {
-                delete_item(item.name);
-            }
+            delete_item(item.name);
         });
         const span = document.createElement("span");
         span.textContent = item.name + " [" + item.label + "] ";
@@ -190,7 +187,7 @@ async function add_item(name, label) {
         }
     }
 
-    if (label.trim() === "" || label === "undefined") { label = null; }
+    if (label.trim() === "" || label === "undefined" || label === "null") { label = ""; }
     if (!newContent_labels.some((l) => l.label === label)) {
         newContent_labels.push({label: label, importance: newContent_labels.length});
         await updateDoc(doc(db, "labels", user_uid), {
@@ -347,6 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (name !== "") {
             await add_item(name, label);
             addItemInput.value = "";
+            addItemInput.focus();
         }
 
         await render_list(auth.currentUser.uid);
