@@ -1,5 +1,6 @@
 import {permissions} from "/assets/docs/permissions.js";
 import {signs} from '/assets/docs/signs.js';
+import {with_user_request} from '/assets/emails/email-templates.js';
 
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import {
@@ -62,6 +63,12 @@ onAuthStateChanged(auth, async (user) => {
     alert("Sie haben schon ein Konto! Bitte verifizieren Sie jedoch zuerst die E-Mail!");
 });
 
+function generate_secure_code(length = 16) {
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('').substring(0, length);
+}
+
 async function new_account(email, username, password, user_type) {
     try {
         const credential = await createUserWithEmailAndPassword(auth, email, password);
@@ -70,15 +77,79 @@ async function new_account(email, username, password, user_type) {
             url: window.location.origin + "/app/account/registration/register/verified/",
             handleCodeInApp: false
         };
-
         await sendEmailVerification(user, actionCodeSettings);
-        await setDoc(doc(db, "accounts", user.uid), {
-            email: email,
-            username: username,
-            user_type: user_type,
-            created_at: new Date(),
-            confirmed: false
-        });
+
+        if (user_type === "with") {
+            let main_user = {
+                name: null,
+                email: null,
+                id: null,
+                type: null,
+                docRef: null
+            };
+            const secure_code = generate_secure_code();
+            while (!main_user.email) {
+                main_user.email = prompt("Bitte geben Sie die E-Mail-Adresse des Hauptnutzers ein!");
+
+                if (!main_user.email) {
+                    alert("Bitte geben Sie eine E-Mail-Adresse ein!");
+                }
+            }
+
+            const accounts_ref = collection(db, "accounts");
+            const accounts_snapshot = await getDocs(accounts_ref);
+
+            for (const account of accounts_snapshot.docs) {
+                const data = account.data();
+
+                if (data.email === main_user.email) {
+                    main_user.name = data.username;
+                    main_user.id = account.id;
+                    main_user.type = data.user_type;
+                    break;
+                }
+            }
+
+            if (main_user.type === "with") {
+                alert("Dieser Nutzer ist bereits ein With-Nutzer!");
+                return;
+            }
+
+            if (!main_user.name) {
+                alert("Es gibt kein Konto mit dieser E-Mail-Adresse!");
+                return;
+            }
+
+            await emailjs.send("service_oyluoai", "template_elanm6q", {
+                subject: "With-User Anmeldung",
+                plus_name: "Hosting",
+                content: with_user_request(username, secure_code),
+                email: main_user.email,
+                name: main_user.name
+            });
+            main_user.docRef = doc(db, "accounts", main_user.id);
+            await updateDoc(main_user.docRef, {
+                request: secure_code
+            });
+            await setDoc(doc(db, "accounts", user.uid), {
+                email: email,
+                username: username,
+                user_type: user_type,
+                created_at: new Date(),
+                confirmed: false,
+                with: false
+            });
+            alert("Bis der Haupt-Nutzer Ihre Anfrage angenommen oder abgelehnt hat, können Sie Ihr Konto als Einzelkonto verwenden, nachdem Sie Ihre E-Mail verifiziert haben! " +
+                "Wenn der Hauptnutzer das gemeinsame Konto akzeptiert oder abgelehnt hat, werden Sie kontaktiert!");
+        } else {
+            await setDoc(doc(db, "accounts", user.uid), {
+                email: email,
+                username: username,
+                user_type: user_type,
+                created_at: new Date(),
+                confirmed: false
+            });
+        }
         window.location.href = "/app/loading/?from=register&action=create&target=/app/account/registration/register/confirmation/";
     } catch (error) {
         check = true;
@@ -187,8 +258,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Sie haben leider keine Berechtigung auf ein EntwicklerInnenkonto!");
         } else if (type === "special" && !permissions.special.includes(email)) {
             alert("Sie haben leider keine Berechtigung auf ein Spezialkonto!");
-        } else if (type === "with") {
-            alert("Diese Funktion ist leider noch nicht verfügbar!");
         } else if (!await check_pw(email, pw)) {
             alert("Dieses Passwort ist zu unsicher! Um die Passwortanforderungen zu lesen, klicken Sie auf den Link unten!");
             pwInfo.classList.toggle("hidden", false);
@@ -196,7 +265,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Die Passwörter stimmen nicht überein!");
         }
         else {
-            check = false;!
+            check = false;
             new_account(email, username, pw, type);
         }
     });

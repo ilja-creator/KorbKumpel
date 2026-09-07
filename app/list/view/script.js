@@ -27,6 +27,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth();
 
+let current_uid = null;
+
 const params = new URLSearchParams(window.location.search);
 const listId = params.get("id");
 
@@ -38,18 +40,26 @@ onAuthStateChanged(auth, async (user) => {
         alert("Bitte melden Sie sich zuerst an!");
         window.location.href = "/app/account/registration/";
         return;
-    }
+    } else { current_uid = user.uid }
 
     const listDocSnap = await getDoc(listDocRef);
     const data = listDocSnap.data();
 
-    if (user.uid !== data.createdBy) {
+    if (!data.members.includes(current_uid)) {
         alert("Sie haben keine Berechtigung, diese Liste einzusehen!");
         window.location.href = "/app/list/see/";
+        return;
     }
 
-    render_list(user.uid);
+    render_list(current_uid);
 });
+
+function check_current_uid() {
+    if (!current_uid) {
+        alert("Die Seite lädt noch. Bitte versuchen Sie es in Kürze erneut!");
+        return false;
+    } return true;
+}
 
 async function render_list(uid) {
     const listDocSnap = await getDoc(listDocRef);
@@ -88,7 +98,7 @@ async function render_list(uid) {
         checkbox.type = "checkbox";
         checkbox.checked = item.checked;
         checkbox.addEventListener("change", (e) => {
-            update_item(data.content, item.name);
+            update_item(data.content, item.name, uid);
         });
         const checkboxWrap = document.createElement("span");
         checkboxWrap.classList.add("checkbox-wrap");
@@ -102,7 +112,7 @@ async function render_list(uid) {
         button.classList.toggle("hidden", !edit_mode);
         button.id = "button-" + index;
         button.addEventListener("click", () => {
-            delete_item(item.name);
+            delete_item(item.name, uid);
         });
         const span = document.createElement("span");
         span.textContent = item.name + " [" + item.label + "] ";
@@ -168,14 +178,12 @@ async function render_labels_list(uid) {
     }
 }
 
-async function add_item(name, label) {
+async function add_item(name, label, uid) {
     const listDocSnap = await getDoc(listDocRef);
     const data = listDocSnap.data();
-    const labelDocSnap = await getDoc(doc(db, "labels", auth.currentUser.uid));
-    const label_data = labelDocSnap.data();
-    const label_user_data = label_data.labels;
-
-    const user_uid = auth.currentUser.uid;
+    const labelDocSnap = await getDoc(doc(db, "labels", uid));
+    const label_data = labelDocSnap.data() || {};
+    const label_user_data = label_data.labels || [];
 
     const newContent = data.content.filter((item) => item !== null);
     const newContent_labels = label_user_data.filter((label) => label !== null);
@@ -190,7 +198,7 @@ async function add_item(name, label) {
     if (label.trim() === "" || label === "undefined" || label === "null") { label = ""; }
     if (!newContent_labels.some((l) => l.label === label)) {
         newContent_labels.push({label: label, importance: newContent_labels.length});
-        await updateDoc(doc(db, "labels", user_uid), {
+        await updateDoc(doc(db, "labels", uid), {
             labels: newContent_labels
         });
     }
@@ -200,9 +208,9 @@ async function add_item(name, label) {
     await updateDoc(listDocRef, {
         content: newContent
     });
-    await render_list(user_uid);
+    await render_list(uid);
 }
-async function delete_item(name) {
+async function delete_item(name, uid) {
     const listDocSnap = await getDoc(listDocRef);
     const data = listDocSnap.data();
 
@@ -212,9 +220,9 @@ async function delete_item(name) {
     await updateDoc(listDocRef, {
         content: newContent
     });
-    await render_list(auth.currentUser.uid);
+    await render_list(uid);
 }
-async function update_item(list, name) {
+async function update_item(list, name, uid) {
     const new_content = list.map((element) => {
         if (element.name === name) {
             return {...element, checked: !element.checked};
@@ -225,7 +233,7 @@ async function update_item(list, name) {
     await updateDoc(listDocRef, {
         content: new_content
     });
-    await render_list(auth.currentUser.uid);
+    await render_list(uid);
 }
 
 function sort_list(list, mode, importanceMap = {}) {
@@ -237,6 +245,10 @@ function sort_list(list, mode, importanceMap = {}) {
      */
     const checked = list.filter((item) => item.checked)
     const unchecked = list.filter((item) => !item.checked);
+
+    if (mode === 1) {
+        return [...unchecked, ...checked];
+    }
 
     if (mode === 2 || mode === 3) {
         unchecked.sort((a, b) => a.name.localeCompare(b.name));
@@ -310,12 +322,13 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelector(".new_article").classList.toggle("hidden");
     });
     sort.addEventListener("change", async() => {
+        if (!check_current_uid()) return;
         const labelMenu = document.getElementById("select-like");
         const selected = Number(sort.value);
         sort_mode = selected;
 
         if (sort_mode === 4) {
-            await sort_labels(auth.currentUser.uid);
+            await sort_labels(current_uid);
             sort_mode = 3;
             sort.value = 3;
         }
@@ -323,11 +336,11 @@ document.addEventListener("DOMContentLoaded", () => {
         await updateDoc(listDocRef, {
             sort_mode: sort_mode
         });
-        await render_list(auth.currentUser.uid);
+        await render_list(current_uid);
 
         if (sort_mode === 3) {
             labelMenu.classList.remove("hidden");
-            render_labels_list(auth.currentUser.uid);
+            render_labels_list(current_uid);
         } else {
             labelMenu.classList.toggle("hidden", true);
         }
@@ -337,17 +350,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     addItemForm.addEventListener("submit", async(event) => {
+        if (!check_current_uid()) return;
         event.preventDefault();
         const name = addItemInput.value.trim();
         const label = labelInput.value.trim();
 
         if (name !== "") {
-            await add_item(name, label);
+            await add_item(name, label, current_uid);
             addItemInput.value = "";
             addItemInput.focus();
         }
 
-        await render_list(auth.currentUser.uid);
+        await render_list(current_uid);
         await updateLabelsSequence();
     });
 
@@ -378,6 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function updateLabelsSequence() {
+        if (!check_current_uid()) return;
         const dropdown = document.getElementById("dropdown");
         const items = [...dropdown.children];
         const newOrder = items.map((item, index) => ({
@@ -385,12 +400,11 @@ document.addEventListener("DOMContentLoaded", () => {
             importance: index
         }));
 
-        const user_uid = auth.currentUser.uid;
-        await updateDoc(doc(db, "labels", user_uid), {
+        await updateDoc(doc(db, "labels", current_uid), {
             labels: newOrder
         });
-        render_labels_list(auth.currentUser.uid);
-        render_list(auth.currentUser.uid);
+        render_labels_list(current_uid);
+        render_list(current_uid);
     }
 
     const toggleBtn = document.querySelector('.menu-toggle');

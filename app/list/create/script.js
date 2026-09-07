@@ -5,6 +5,7 @@ import {
     doc,
     updateDoc,
     setDoc,
+    getDoc,
     getDocs
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import {
@@ -26,6 +27,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+let current_uid = null;
+
 document.addEventListener("DOMContentLoaded", () => {
     const name_list = document.getElementById("list")
     const acceptance = document.getElementById("acceptance");
@@ -33,7 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const createListButton = document.getElementById("create_list");
 
     async function save_list() {
-        console.log("save_list wurde aufgerufen");
+        if (!current_uid) {
+            alert("Bitte versuchen Sie es in Kürze erneut!");
+            return;
+        }
+
         const listsSnapshot = await getDocs(collection(db, "lists"));
         let maxId = 0;
         let nameExists = false;
@@ -62,6 +69,15 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        let members = [current_uid];
+        const userSnapshot = await getDoc(doc(db, "accounts", current_uid));
+        const userData = userSnapshot.data();
+        if (userData.with) {
+            if (confirm("Wollen Sie diese Liste mit ihren Mit-Nutzern teilen? Wenn Sie dies nicht wollen, drücken Sie 'Abbrechen' und eine private Liste wird erstellt")) {
+                members = [current_uid, userData.with];
+            }
+        }
+
         const docRef = doc(db, "lists", String(nextId));
         await setDoc(docRef, {
             category: category.value,
@@ -69,8 +85,9 @@ document.addEventListener("DOMContentLoaded", () => {
             content: [null],
             listNumber: nextId,
             name: listName,
-            createdBy: auth.currentUser.uid,
-            sort_mode: 1
+            createdBy: current_uid,
+            sort_mode: 1,
+            members: members
         });
 
         window.location.href = `/app/loading/?from=list&action=create&target=/app/list/view?id=${docRef.id}`;
@@ -96,7 +113,9 @@ onAuthStateChanged(auth, async (user) => {
         alert("Sie sind nicht angemeldet!");
         window.location.href="/app/account/registration/";
         return;
-    } if(user.emailVerified) {
+    } else {
+        current_uid = user.uid;
+    } if (user.emailVerified) {
         await updateDoc(doc(db, "accounts", user.uid), { confirmed: true });
 
         const lastLogIn = new Date (user.metadata.lastSignInTime);

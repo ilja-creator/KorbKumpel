@@ -48,13 +48,13 @@ function get_category_label(category) {
     return label;
 }
 
-async function render_list_buttons() {
+async function render_list_buttons(uid) {
     const container = document.getElementById("list_cont");
     const listsSnapshot = await getDocs(collection(db, "lists"));
 
     for (const docSnap of listsSnapshot.docs) {
         const data = docSnap.data();
-        if (auth.currentUser.uid === data.createdBy) {
+        if (data.members.includes(uid)) {
             const count = await get_content_count(docSnap.id);
             const category = get_category_label(data.category);
 
@@ -68,6 +68,10 @@ async function render_list_buttons() {
             dlt_button.textContent = "🗑";
 
             dlt_button.addEventListener("click", async () => {
+                if (data.createdBy !== uid) {
+                    alert("Sie können als With-Nutzer keine Listen löschen!");
+                    return;
+                }
                 if (confirm(`Wollen Sie die Liste ${data.name} wirklich irreversibel löschen?`)) {
                     await deleteDoc(doc(db, "lists", docSnap.id));
                     button_group.remove();
@@ -117,6 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        render_list_buttons();
+        render_list_buttons(user.uid);
     }
 });

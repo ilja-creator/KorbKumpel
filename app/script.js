@@ -1,3 +1,5 @@
+import { welcome_text } from '/assets/emails/email-templates.js';
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import {
     getFirestore,
@@ -170,7 +172,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 alert("ERROR");
                 return;
             }
+
             await emailjs.send("service_oyluoai", "template_elanm6q", {
+                subject: "Willkommen bei KorbKumpel!",
+                plus_name: "Welcome",
+                content: welcome_text,
                 email: email,
                 name: name
             });
