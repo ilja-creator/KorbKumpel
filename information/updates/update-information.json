@@ -45,10 +45,12 @@
     {
       "version": "v2-3-0",
       "features_list": [
-        "With-User-Funktionen aktiviert",
+        "With-Nutzer-Funktionen aktiviert",
+        "Labels von Artikeln können bearbeitet werden",
         "Fehlerbehebung beim Listenerstellen und -bearbeiten",
         "Überarbeitung der E-Mail-Informationen",
-        "Vorbeugende Fehlerbehebung"
+        "Vorbeugende Fehlerbehebung",
+        "Überarbeitung der Informationsseite"
       ]
     }
   ]

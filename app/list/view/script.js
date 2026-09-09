@@ -233,7 +233,7 @@ async function delete_item(name, uid) {
     });
     await render_list(uid);
 }
-async function edit_label(name) {
+async function edit_label(name, uid) {
     const listDocSnap = await getDoc(listDocRef);
     const data = listDocSnap.data();
 
@@ -242,7 +242,8 @@ async function edit_label(name) {
         let newContent = data.content.filter((item) => item !== null);
         for (const content of newContent) {
             if (content.name === name) {
-                content.name = new_label;
+                content.label = new_label;
+                render_list(uid);
                 break;
             }
         }
