@@ -54,7 +54,7 @@ async function render_list_buttons(uid) {
 
     for (const docSnap of listsSnapshot.docs) {
         const data = docSnap.data();
-        if (data.members.includes(uid)) {
+        if ((data.members || []).includes(uid) || data.createdBy === uid) {
             const count = await get_content_count(docSnap.id);
             const category = get_category_label(data.category);
 

@@ -19,6 +19,11 @@ import {
     onAuthStateChanged,
     signOut
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/+esm';
+
+emailjs.init({
+    publicKey: "qQjyms3EOPdybsHRJ"
+});
 
 const firebaseConfig = {
     apiKey: "AIzaSyDDVyeXu7qx6ESApel4Ew8CaQyi0tmLiHc",

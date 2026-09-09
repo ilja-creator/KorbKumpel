@@ -237,14 +237,18 @@ button:active {
     display: none !important;
 }
 
-.delete-btn {
+.edit-btn {
     padding: 0.25rem 0.5rem !important;
     font-size: 1rem !important;
-    margin-left: auto !important;
     margin-right: 0 !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
     animation: none;
+}
+.item-buttons {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
 }
 
 .checked {

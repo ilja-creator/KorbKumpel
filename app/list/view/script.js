@@ -6,7 +6,6 @@ import {
     getDoc,
     getDocs,
     updateDoc,
-    deleteDoc,
     arrayUnion
 } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import {
@@ -45,7 +44,7 @@ onAuthStateChanged(auth, async (user) => {
     const listDocSnap = await getDoc(listDocRef);
     const data = listDocSnap.data();
 
-    if (!data.members.includes(current_uid)) {
+    if (!(data.members || []).includes(current_uid) && data.createdBy !== current_uid) {
         alert("Sie haben keine Berechtigung, diese Liste einzusehen!");
         window.location.href = "/app/list/see/";
         return;
@@ -105,22 +104,34 @@ async function render_list(uid) {
         checkboxWrap.appendChild(checkbox);
 
         const label = document.createElement("label");
-        const button = document.createElement("button");
-        button.textContent = "🗑";
-        button.type = "button";
-        button.classList.add("delete-btn")
-        button.classList.toggle("hidden", !edit_mode);
-        button.id = "button-" + index;
-        button.addEventListener("click", () => {
+        const dlt_button = document.createElement("button");
+        dlt_button.textContent = "🗑";
+        dlt_button.type = "button";
+        dlt_button.classList.add("edit-btn")
+        dlt_button.classList.toggle("hidden", !edit_mode);
+        dlt_button.addEventListener("click", () => {
             delete_item(item.name, uid);
+        });
+        const edit_label_button = document.createElement("button");
+        edit_label_button.textContent = "🏷";
+        edit_label_button.type = "button";
+        edit_label_button.classList.add("edit-btn")
+        edit_label_button.classList.toggle("hidden", !edit_mode);
+        edit_label_button.addEventListener("click", () => {
+            edit_label(item.name, uid);
         });
         const span = document.createElement("span");
         span.textContent = item.name + " [" + item.label + "] ";
         span.classList.toggle("checked", item.checked);
 
+        const button_group = document.createElement("div");
+        button_group.classList.add("item-buttons");
+        button_group.appendChild(edit_label_button);
+        button_group.appendChild(dlt_button);
+
         label.appendChild(checkboxWrap);
         label.appendChild(span);
-        label.appendChild(button);
+        label.appendChild(button_group);
 
         li.appendChild(label);
 
@@ -222,6 +233,25 @@ async function delete_item(name, uid) {
     });
     await render_list(uid);
 }
+async function edit_label(name) {
+    const listDocSnap = await getDoc(listDocRef);
+    const data = listDocSnap.data();
+
+    const new_label = prompt("Neues Label: ")
+    if (new_label) {
+        let newContent = data.content.filter((item) => item !== null);
+        for (const content of newContent) {
+            if (content.name === name) {
+                content.name = new_label;
+                break;
+            }
+        }
+        await updateDoc(listDocRef, {
+           content: newContent
+        });
+    } else { return; }
+}
+
 async function update_item(list, name, uid) {
     const new_content = list.map((element) => {
         if (element.name === name) {
@@ -313,7 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sort.classList.toggle("hidden");
         document.querySelector(".new_article").classList.add("hidden");
         addItemButton.classList.remove("selected");
-        document.querySelectorAll(".delete-btn").forEach((item) => {
+        document.querySelectorAll(".edit-btn").forEach((item) => {
             item.classList.toggle("hidden", !edit_mode);
         });
     });
@@ -322,6 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelector(".new_article").classList.toggle("hidden");
     });
     sort.addEventListener("change", async() => {
+        console.log("sort changed:", sort.value);
         if (!check_current_uid()) return;
         const labelMenu = document.getElementById("select-like");
         const selected = Number(sort.value);
@@ -395,6 +426,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!check_current_uid()) return;
         const dropdown = document.getElementById("dropdown");
         const items = [...dropdown.children];
+
+        if (items.length === 0) return;
+
         const newOrder = items.map((item, index) => ({
             label: item.querySelector("span").textContent,
             importance: index

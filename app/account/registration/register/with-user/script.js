@@ -102,7 +102,7 @@ onAuthStateChanged(auth, async (user) => {
                                 name: new_user
                             });
                         }
-                    }
+                    } window.location.href = "/app/";
                 });
                 decline_btn.addEventListener("click", async () => {
                     if (confirm("Sind Sie sich sicher, dass Sie die Anfrage ablehnen wollen?")) {
@@ -124,7 +124,7 @@ onAuthStateChanged(auth, async (user) => {
                                 });
                             }
                         }
-                    }
+                    } window.location.href = "/app/";
                 });
             } else {
                 window.location.href = "/app/";

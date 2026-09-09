@@ -53,20 +53,18 @@ async function get_latest_version(updates) {
     return validUpdates[0];
 }
 
-async function get_list_count() {
+async function get_list_count(uid) {
     const listsSnapshot = await getDocs(collection(db, "lists"));
-    const user = auth.currentUser;
     let n_lists = 0;
 
     for (const listDoc of listsSnapshot.docs) {
-        if (listDoc.data().createdBy === user.uid) { n_lists++; }
-    }
-    return n_lists;
+        const data = listDoc.data();
+        if ((data.members || []).includes(uid) || (data.createdBy === uid)) { n_lists++; }
+    } return n_lists;
 }
 
-async function check_user_type() {
-    const user = auth.currentUser;
-    const accountDoc = await getDoc(doc(db, "accounts", user.uid));
+async function check_user_type(uid) {
+    const accountDoc = await getDoc(doc(db, "accounts", uid));
     const accountData = accountDoc.data();
 
     if (accountData.user_type === "admin") {
@@ -126,13 +124,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     seeListsButton.addEventListener("click", () => {
         window.location.href = "/app/list/see/";
     });
-
-    try {
-        const n_lists = await get_list_count();
-        seeListsButton.textContent = "See lists (" + n_lists + ")";
-    } catch (err) {
-        console.error("Konnte Listenanzahl nicht laden:", err);
-    }
 
     document.getElementById("send_email").addEventListener("click", async () => {
         const emailSelect = document.getElementById("email");
@@ -198,7 +189,14 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    check_user_type();
+    check_user_type(user.uid);
+
+    try {
+        const n_lists = await get_list_count(user.uid);
+        seeListsButton.textContent = "See lists (" + n_lists + ")";
+    } catch (err) {
+        console.error("Konnte Listenanzahl nicht laden:", err);
+    }
 
     await user.reload();
 
