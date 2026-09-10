@@ -50,7 +50,7 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
-    render_list(current_uid);
+    await render_list(current_uid);
 });
 
 function check_current_uid() {
@@ -143,7 +143,7 @@ async function render_list(uid) {
     const labelMenu = document.getElementById("select-like");
     if (sort_mode === 3) {
         labelMenu.classList.remove("hidden");
-        render_labels_list(uid);
+        await render_labels_list(uid);
     } else {
         labelMenu.classList.add("hidden");
     }
@@ -243,13 +243,28 @@ async function edit_label(name, uid) {
         for (const content of newContent) {
             if (content.name === name) {
                 content.label = new_label;
-                render_list(uid);
                 break;
             }
         }
+
+        const labelDocSnap = await getDoc(doc(db, "labels", uid));
+        const label_data = labelDocSnap.data() || {};
+        const newContent_labels = (label_data.labels || []).filter((label) => label !== null);
+
+        if (!newContent_labels.some((l) => l.label === new_label)) {
+            newContent_labels.push({
+                label: new_label,
+                importance: newContent_labels.length
+            });
+            await updateDoc(doc(db, "labels", uid), {
+                labels: newContent_labels
+            });
+        }
+
         await updateDoc(listDocRef, {
            content: newContent
         });
+        await render_list(uid);
     } else { return; }
 }
 
@@ -372,7 +387,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (sort_mode === 3) {
             labelMenu.classList.remove("hidden");
-            render_labels_list(current_uid);
+            await render_labels_list(current_uid);
         } else {
             labelMenu.classList.toggle("hidden", true);
         }
@@ -394,7 +409,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         await render_list(current_uid);
-        await updateLabelsSequence();
     });
 
     const toggleMenuButton = document.getElementById("toggle-menu-button");
@@ -438,8 +452,8 @@ document.addEventListener("DOMContentLoaded", () => {
         await updateDoc(doc(db, "labels", current_uid), {
             labels: newOrder
         });
-        render_labels_list(current_uid);
-        render_list(current_uid);
+        await render_labels_list(current_uid);
+        await render_list(current_uid);
     }
 
     const toggleBtn = document.querySelector('.menu-toggle');

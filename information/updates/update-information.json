@@ -52,6 +52,14 @@
         "Vorbeugende Fehlerbehebung",
         "Überarbeitung der Informationsseite"
       ]
+    },
+    {
+      "version":  "v2-3-1",
+      "features_list": [
+        "Fehlerbehebung von einstandenem Fehlverhalten der Version 2.3.0: ",
+        "§ Labels werden korrekt geladen",
+        "§ Labels die durch Labeländerungsbutton neu hinzugefügt werden, werden gespeichert"
+      ]
     }
   ]
 }
