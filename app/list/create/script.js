@@ -35,6 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const category = document.getElementById("category");
     const createListButton = document.getElementById("create_list");
 
+    name_list.value = "Einkauf";
+
     async function save_list() {
         if (!current_uid) {
             alert("Bitte versuchen Sie es in Kürze erneut!");
